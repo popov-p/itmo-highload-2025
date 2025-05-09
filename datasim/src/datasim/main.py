@@ -1,22 +1,31 @@
 import os
-from proto.messages_pb2 import Batch
+from proto.messages_pb2 import Batch, HealthStatus
 from .prometheus import REQUESTS_TOTAL, REQUESTS_FAILED, REQUEST_DURATION, DEVICE_FREQ, DEVICE_COUNT
 from prometheus_client import start_http_server
 import asyncio
 import aiohttp
-import random
 import signal
 import logging
 import time
+import random
 
-logging.basicConfig(
-    filename='/var/log/datasim.log',
-    level=logging.INFO,
-    format='%(name)s - %(levelname)s - %(message)s',
-    filemode='a'
-)
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
 
-url = "http://nginx/incoming-data"
+formatter = logging.Formatter('%(name)s - %(levelname)s - %(message)s')
+
+file_handler = logging.FileHandler('/var/log/datasim.log', mode='a')
+file_handler.setFormatter(formatter)
+
+console_handler = logging.StreamHandler()
+console_handler.setFormatter(formatter)
+
+logger.addHandler(file_handler)
+logger.addHandler(console_handler)
+
+
+# url = "http://nginx/incoming-data"
+url = "http://controller:8060/incoming-data"
 
 class DataSimulator:
     def __init__(self, num_devices: int, frequency: float):
@@ -25,44 +34,56 @@ class DataSimulator:
         self.tasks = []
         self.stop_event = asyncio.Event()
 
-    async def generate_message(self, device_id:int):
+    async def generate_message(self, gpu_id:int):
         try:
             async with aiohttp.ClientSession() as session:
                 while not self.stop_event.is_set():
-                    batch = Batch(device_id=device_id,
-                                  alpha=random.randint(1, 100),
-                                  beta=random.randint(1, 100),
-                                  timestamp=str(time.time()))
-                    logging.info(f"Отправляем данные. ID: {batch.device_id}, "
-                                 f"alpha: {batch.alpha}, beta: {batch.beta}, timestamp: {batch.timestamp}")
-                    print(f"Отправляем данные. ID: {batch.device_id}, "
-                                 f"alpha: {batch.alpha}, beta: {batch.beta}, timestamp: {batch.timestamp}")
+                    batch = Batch(
+                        gpu_id=gpu_id,
+                        ker_temp=random.uniform(30.0, 90.0),
+                        ker_load=random.uniform(0.0, 100.0),
+                        mem_temp=random.uniform(30.0, 95.0),
+                        mem_load=random.uniform(0.0, 100.0),
+                        health_status=random.choice([
+                            HealthStatus.OK,
+                            HealthStatus.WARNING,
+                            HealthStatus.CRITICAL
+                        ]),
+                        timestamp=str(time.time())
+                    )
+
+                    logging.info(
+                        f"Отправляем данные. "
+                        f"ID: {batch.gpu_id}, "
+                        f"ker_temp: {batch.ker_temp:.2f}, "
+                        f"ker_load: {batch.ker_load:.2f}, "
+                        f"mem_temp: {batch.mem_temp:.2f}, "
+                        f"mem_load: {batch.mem_load:.2f}, "
+                        f"health_status: {batch.health_status}, "
+                        f"timestamp: {batch.timestamp}"
+                    )
                     start_time = time.time()
 
                     try:
                         async with session.post(url, data=batch.SerializeToString()) as response:
+                            logging.info("Попытка отправить пакет.")
                             duration = time.time() - start_time
-                            REQUEST_DURATION.labels(device_id=device_id).set(duration)
+                            REQUEST_DURATION.labels(gpu_id=gpu_id).set(duration)
                             if response.status == 200:
                                 logging.info(f"Ответ от IOT контроллера: {await response.text()}")
-                                print(f"Ответ от IOT контроллера: {await response.text()}")
                                 REQUESTS_TOTAL.labels(status="success").inc()
                             else:
                                 error_text = await response.text()
-                                logging.error(f"Ошибка при отправке. Статус: {response.status}, тело ошибки: {error_text}.")
-                                print(
-                                    f"Ошибка при отправке. Статус: {response.status}, тело ошибки: {error_text}.")
+                                logging.error(f"Ошибка при отправке. Статус: {response.status}, тело ошибки: {error_text}")
                     except Exception as ex:
                         logging.error(f"Ошибка при отправке данных. {ex}")
-                        print(f"Ошибка при отправке данных. {ex}")
-                        REQUESTS_FAILED.labels(device_id=device_id).inc()
+                        REQUESTS_FAILED.labels(gpu_id=gpu_id).inc()
+                    logging.info(f"Async sleep на {1 / self.frequency} секунд.")
                     await asyncio.sleep(1 / self.frequency)
         except Exception as ex:
-            logging.error(f"An error occurred in task for device {device_id}: {ex}")
-            print(f"An error occurred in task for device {device_id}: {ex}")
+            logging.error(f"Возникла ошибка при формировании async task для видеокарты {gpu_id}: {ex}")
         finally:
-            logging.info(f"Task stopped for device {device_id}.")
-            print(f"Task stopped for device {device_id}.")
+            logging.info(f"Async task остановлено для видеокарты {gpu_id}")
 
     def stop(self):
         self.stop_event.set()
@@ -70,8 +91,8 @@ class DataSimulator:
     async def start(self):
         DEVICE_COUNT.set(self.num_devices)
         DEVICE_FREQ.set(self.frequency)
-        for device_id in range(1, self.num_devices + 1):
-            self.tasks.append(self.generate_message(device_id))
+        for gpu_id in range(1, self.num_devices + 1):
+            self.tasks.append(self.generate_message(gpu_id))
 
         await asyncio.gather(*self.tasks)
 

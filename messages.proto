@@ -3,8 +3,17 @@ syntax = "proto3";
 package dm;
 
 message Batch {
-    int32 device_id = 1;
-    float alpha = 2;
-    float beta = 3;
-    string timestamp = 4;
+    int32 gpu_id = 1;
+    float ker_temp = 2;
+    float ker_load = 3;
+    float mem_temp = 4;
+    float mem_load = 5;
+    HealthStatus health_status = 6;
+    string timestamp = 7;
+}
+
+enum HealthStatus {
+ OK = 0;
+ WARNING = 1;
+ CRITICAL = 2;
 }

@@ -23,10 +23,10 @@
 message Batch {
     int32 gpu_id = 1;
     float ker_temp = 2;
-    float ker_load = 2;
-    float mem_temp = 3;
-    float mem_load = 4;
-    string timestamp = 4;
+    float ker_load = 3;
+    float mem_temp = 4;
+    float mem_load = 5;
+    string timestamp = 6;
 }
 ```
 Пакет Batch представляет собой protobuf-сообщение. Библиотека protobuf предоставляет удобные инструменты для сериализации/десериализации сообщений.

@@ -28,14 +28,12 @@ services:
     networks:
       - backend
 
-  controller_first:
+  controller:
     build:
       context: ./controller
     restart: on-failure
     ports:
-      - "${CONTROLLER_PORT_FIRST:-8061}:8061"
-    environment:
-      - CONTROLLER_PORT_FIRST=8061
+      - "8060:8060"
     volumes:
       - controller_src:/controller/src
       - logs_storage:/var/log/
@@ -49,46 +47,24 @@ services:
     networks:
       - backend
 
-  controller_second:
-    build:
-      context: ./controller
-    restart: on-failure
-    ports:
-      - "${CONTROLLER_PORT_SECOND:-8062}:8062"
-    environment:
-      - CONTROLLER_PORT_SECOND=8062
-    volumes:
-      - controller_src:/controller/src
-      - logs_storage:/var/log/
-    develop:
-      watch:
-        - action: sync+restart
-          path: .
-          target: .
-    depends_on:
-      - mongo
-    networks:
-      - backend
-
-  rule_engine:
-    build:
-      context: ./rule_engine
-    restart: always
-    volumes:
-      - rule_engine_src:/rule_engine/src
-      - logs_storage:/var/log/
-    ports:
-      - "8700:8700"
-    develop:
-      watch:
-        - action: sync+restart
-          path: .
-          target: .
-    depends_on:
-      - controller_first
-      - controller_second
-    networks:
-      - backend
+#  rule_engine:
+#    build:
+#      context: ./rule_engine
+#    restart: always
+#    volumes:
+#      - rule_engine_src:/rule_engine/src
+#      - logs_storage:/var/log/
+#    ports:
+#      - "8700:8700"
+#    develop:
+#      watch:
+#        - action: sync+restart
+#          path: .
+#          target: .
+#    depends_on:
+#      - controller
+#    networks:
+#      - backend
 
   datasim:
     build:
@@ -104,79 +80,79 @@ services:
         - action: sync+restart
           path: .
           target: .
-    depends_on:
-      - rule_engine
+#    depends_on:
+#      - rule_engine
     networks:
       - backend
 
-  grafana:
-    image: grafana/grafana:latest
-    depends_on:
-      - prometheus
-    restart: unless-stopped
-    ports:
-      - '3000:3000'
-    volumes:
-      - grafana_storage:/var/lib/grafana
-    networks:
-      - backend
-
-  prometheus:
-    image: prom/prometheus:latest
-    volumes:
-      - prometheus_data:/prometheus
-      - ./prometheus.yml:/etc/prometheus/prometheus.yml
-    ports:
-      - "9090:9090"
-    networks:
-      - backend
-
-  elasticsearch:
-    image: elasticsearch:8.15.3
-    environment:
-      - discovery.type=single-node
-      - xpack.security.enabled=false
-    ports:
-      - "9200:9200"
-    restart: on-failure
-    networks:
-      - backend
-
-  logstash:
-    image: logstash:8.15.3
-    ports:
-      - "5044:5044"
-      - "9600:9600"
-    volumes:
-      - ./logstash.conf:/usr/share/logstash/pipeline/logstash.conf
-    networks:
-      - backend
-    restart: on-failure
-    depends_on:
-      - elasticsearch
-
-  kibana:
-    image: kibana:8.15.3
-    ports:
-      - "5601:5601"
-    environment:
-      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
-    networks:
-      - backend
-    restart: on-failure
-    depends_on:
-      - elasticsearch
-
-  filebeat:
-    image: elastic/filebeat:8.15.3
-    volumes:
-      - ./filebeat.yml:/usr/share/filebeat/filebeat.yml
-      - logs_storage:/var/log
-    networks:
-      - backend
-    restart: on-failure
-    depends_on:
-      - logstash
+#  grafana:
+#    image: grafana/grafana:latest
+#    depends_on:
+#      - prometheus
+#    restart: unless-stopped
+#    ports:
+#      - '3000:3000'
+#    volumes:
+#      - grafana_storage:/var/lib/grafana
+#    networks:
+#      - backend
+#
+#  prometheus:
+#    image: prom/prometheus:latest
+#    volumes:
+#      - prometheus_data:/prometheus
+#      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+#    ports:
+#      - "9090:9090"
+#    networks:
+#      - backend
+#
+#  elasticsearch:
+#    image: elasticsearch:8.15.3
+#    environment:
+#      - discovery.type=single-node
+#      - xpack.security.enabled=false
+#    ports:
+#      - "9200:9200"
+#    restart: on-failure
+#    networks:
+#      - backend
+#
+#  logstash:
+#    image: logstash:8.15.3
+#    ports:
+#      - "5044:5044"
+#      - "9600:9600"
+#    volumes:
+#      - ./logstash.conf:/usr/share/logstash/pipeline/logstash.conf
+#    networks:
+#      - backend
+#    restart: on-failure
+#    depends_on:
+#      - elasticsearch
+#
+#  kibana:
+#    image: kibana:8.15.3
+#    ports:
+#      - "5601:5601"
+#    environment:
+#      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+#    networks:
+#      - backend
+#    restart: on-failure
+#    depends_on:
+#      - elasticsearch
+#
+#  filebeat:
+#    image: elastic/filebeat:8.15.3
+#    volumes:
+#      - ./filebeat.yml:/usr/share/filebeat/filebeat.yml
+#      - logs_storage:/var/log
+#    networks:
+#      - backend
+#    restart: on-failure
+#    depends_on:
+#      - logstash
 
   redis:
     image: redis:latest
@@ -186,17 +162,17 @@ services:
       - backend
     restart: on-failure
 
-  nginx:
-    image: nginx:latest
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf
-      - ./index.html:/usr/share/nginx/html/index.html
-    restart: on-failure
-    networks:
-      - backend
+#  nginx:
+#    image: nginx:latest
+#    ports:
+#      - "80:80"
+#      - "443:443"
+#    volumes:
+#      - ./nginx.conf:/etc/nginx/nginx.conf
+#      - ./index.html:/usr/share/nginx/html/index.html
+#    restart: on-failure
+#    networks:
+#      - backend
 
 
 volumes:
@@ -204,9 +180,9 @@ volumes:
   rabbitmq_data:
   controller_src:
   datasim_src:
-  rule_engine_src:
-  grafana_storage:
-  prometheus_data:
+#  rule_engine_src:
+#  grafana_storage:
+#  prometheus_data:
   logs_storage:
 
 networks:

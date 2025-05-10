@@ -80,32 +80,32 @@ services:
         - action: sync+restart
           path: .
           target: .
-#    depends_on:
-#      - rule_engine
+    depends_on:
+      - rule_engine
     networks:
       - backend
 
-#  grafana:
-#    image: grafana/grafana:latest
-#    depends_on:
-#      - prometheus
-#    restart: unless-stopped
-#    ports:
-#      - '3000:3000'
-#    volumes:
-#      - grafana_storage:/var/lib/grafana
-#    networks:
-#      - backend
-#
-#  prometheus:
-#    image: prom/prometheus:latest
-#    volumes:
-#      - prometheus_data:/prometheus
-#      - ./prometheus.yml:/etc/prometheus/prometheus.yml
-#    ports:
-#      - "9090:9090"
-#    networks:
-#      - backend
+  grafana:
+    image: grafana/grafana:latest
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+    ports:
+      - '3000:3000'
+    volumes:
+      - grafana_storage:/var/lib/grafana
+    networks:
+      - backend
+
+  prometheus:
+    image: prom/prometheus:latest
+    volumes:
+      - prometheus_data:/prometheus
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+    networks:
+      - backend
 #
 #  elasticsearch:
 #    image: elasticsearch:8.15.3
@@ -181,8 +181,8 @@ volumes:
   controller_src:
   datasim_src:
   rule_engine_src:
-#  grafana_storage:
-#  prometheus_data:
+  grafana_storage:
+  prometheus_data:
   logs_storage:
 
 networks:

@@ -1,8 +1,4 @@
 from proto.messages_pb2 import Batch, GpuInfo
-
-
-from .prometheus import REQUESTS_TOTAL, REQUESTS_FAILED, REQUEST_DURATION, DEVICE_FREQ, DEVICE_COUNT
-from prometheus_client import start_http_server
 import asyncio
 import aiohttp
 import signal
@@ -28,6 +24,8 @@ logger.addHandler(console_handler)
 # url = "http://nginx/incoming-data"
 url = "http://controller:8060/incoming-data"
 
+registered_gpus = {}
+
 class DataSimulator:
     def __init__(self, num_devices: int, frequency: float):
         self.num_devices = num_devices
@@ -39,18 +37,23 @@ class DataSimulator:
         try:
             async with aiohttp.ClientSession() as session:
                 while not self.stop_event.is_set():
-                    gpu_info = GpuInfo(
-                        gpu_id=gpu_id,
-                        model=random.choice(["RTX 3090", "A100", "RTX 4080", "TITAN V"]),
-                        max_ker_temp=int(random.uniform(90.0, 100.0)),
-                        max_mem_temp=int(random.uniform(110.0, 120.0)),
-                    )
+
+                    if gpu_id not in registered_gpus:
+                        gpu_info = GpuInfo(
+                            gpu_id=gpu_id,
+                            model=random.choice(["RTX 3090", "A100", "RTX 4080", "TITAN V"]),
+                            max_ker_temp=int(random.uniform(90.0, 100.0)),
+                            max_mem_temp=int(random.uniform(110.0, 120.0)),
+                        )
+                        registered_gpus[gpu_id] = gpu_info
+                    else:
+                        gpu_info = registered_gpus[gpu_id]
 
                     batch = Batch(
                         gpu_info=gpu_info,
                         ker_temp=random.uniform(30.0, 110.0),
                         ker_load=random.uniform(0.0, 100.0),
-                        mem_temp=random.uniform(30.0, 130.0),
+                        mem_temp=random.uniform(30.0, 170.0),
                         mem_load=random.uniform(0.0, 100.0),
                         timestamp=str(time.time()),
                     )
@@ -64,21 +67,16 @@ class DataSimulator:
                         f"mem_load: {batch.mem_load:.2f}, "
                         f"timestamp: {batch.timestamp}"
                     )
-                    start_time = time.time()
 
                     try:
                         async with session.post(url, data=batch.SerializeToString()) as response:
-                            duration = time.time() - start_time
-                            REQUEST_DURATION.labels(gpu_id=gpu_id).set(duration)
                             if response.status == 200:
                                 logging.info(f"Ответ от IOT контроллера: {await response.text()}")
-                                REQUESTS_TOTAL.labels(status="success").inc()
                             else:
                                 error_text = await response.text()
                                 logging.error(f"Ошибка при отправке. Статус: {response.status}, тело ошибки: {error_text}")
                     except Exception as ex:
                         logging.error(f"Ошибка при отправке данных. {ex}")
-                        REQUESTS_FAILED.labels(gpu_id=gpu_id).inc()
                     logging.info(f"Async sleep на {1 / self.frequency} секунд.")
                     await asyncio.sleep(1 / self.frequency)
         except Exception as ex:
@@ -90,8 +88,6 @@ class DataSimulator:
         self.stop_event.set()
 
     async def start(self):
-        DEVICE_COUNT.set(self.num_devices)
-        DEVICE_FREQ.set(self.frequency)
         for gpu_id in range(1, self.num_devices + 1):
             self.tasks.append(self.generate_message(gpu_id))
 
@@ -103,7 +99,6 @@ def main():
     frequency = 0.5
     generator = DataSimulator(num_devices, frequency)
 
-    start_http_server(8070)
     loop = asyncio.get_event_loop()
     loop.add_signal_handler(signal.SIGTERM, generator.stop)
     loop.add_signal_handler(signal.SIGINT, generator.stop)

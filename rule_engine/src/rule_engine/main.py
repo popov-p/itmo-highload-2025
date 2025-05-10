@@ -2,12 +2,22 @@ import asyncio
 from prometheus_client import start_http_server
 from .rabbitmq import connect_to_rabbitmq
 import logging
-logging.basicConfig(
-    filename='/var/log/rule_engine.log',
-    level=logging.INFO,
-    format='%(name)s - %(levelname)s - %(message)s',
-    filemode='a'
-)
+
+
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
+
+formatter = logging.Formatter('%(name)s:%(levelname)s:%(message)s')
+
+file_handler = logging.FileHandler('/var/log/rule_engine.log', mode='a')
+file_handler.setFormatter(formatter)
+
+console_handler = logging.StreamHandler()
+console_handler.setFormatter(formatter)
+
+logger.addHandler(file_handler)
+logger.addHandler(console_handler)
+
 
 async def main():
     start_http_server(8080)

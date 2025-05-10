@@ -1,5 +1,6 @@
-import os
-from proto.messages_pb2 import Batch, HealthStatus
+from proto.messages_pb2 import Batch, GpuInfo
+
+
 from .prometheus import REQUESTS_TOTAL, REQUESTS_FAILED, REQUEST_DURATION, DEVICE_FREQ, DEVICE_COUNT
 from prometheus_client import start_http_server
 import asyncio
@@ -12,7 +13,7 @@ import random
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
-formatter = logging.Formatter('%(name)s - %(levelname)s - %(message)s')
+formatter = logging.Formatter('%(name)s:%(levelname)s:%(message)s')
 
 file_handler = logging.FileHandler('/var/log/datasim.log', mode='a')
 file_handler.setFormatter(formatter)
@@ -38,35 +39,35 @@ class DataSimulator:
         try:
             async with aiohttp.ClientSession() as session:
                 while not self.stop_event.is_set():
-                    batch = Batch(
+                    gpu_info = GpuInfo(
                         gpu_id=gpu_id,
-                        ker_temp=random.uniform(30.0, 90.0),
+                        model=random.choice(["RTX 3090", "A100", "RTX 4080", "TITAN V"]),
+                        max_ker_temp=int(random.uniform(90.0, 100.0)),
+                        max_mem_temp=int(random.uniform(110.0, 120.0)),
+                    )
+
+                    batch = Batch(
+                        gpu_info=gpu_info,
+                        ker_temp=random.uniform(30.0, 110.0),
                         ker_load=random.uniform(0.0, 100.0),
-                        mem_temp=random.uniform(30.0, 95.0),
+                        mem_temp=random.uniform(30.0, 130.0),
                         mem_load=random.uniform(0.0, 100.0),
-                        health_status=random.choice([
-                            HealthStatus.OK,
-                            HealthStatus.WARNING,
-                            HealthStatus.CRITICAL
-                        ]),
-                        timestamp=str(time.time())
+                        timestamp=str(time.time()),
                     )
 
                     logging.info(
                         f"Отправляем данные. "
-                        f"ID: {batch.gpu_id}, "
+                        f"gpu_info: {batch.gpu_info}"
                         f"ker_temp: {batch.ker_temp:.2f}, "
                         f"ker_load: {batch.ker_load:.2f}, "
                         f"mem_temp: {batch.mem_temp:.2f}, "
                         f"mem_load: {batch.mem_load:.2f}, "
-                        f"health_status: {batch.health_status}, "
                         f"timestamp: {batch.timestamp}"
                     )
                     start_time = time.time()
 
                     try:
                         async with session.post(url, data=batch.SerializeToString()) as response:
-                            logging.info("Попытка отправить пакет.")
                             duration = time.time() - start_time
                             REQUEST_DURATION.labels(gpu_id=gpu_id).set(duration)
                             if response.status == 200:
@@ -99,7 +100,7 @@ class DataSimulator:
 
 def main():
     num_devices = 1
-    frequency = 1
+    frequency = 0.5
     generator = DataSimulator(num_devices, frequency)
 
     start_http_server(8070)

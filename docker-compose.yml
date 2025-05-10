@@ -47,24 +47,24 @@ services:
     networks:
       - backend
 
-#  rule_engine:
-#    build:
-#      context: ./rule_engine
-#    restart: always
-#    volumes:
-#      - rule_engine_src:/rule_engine/src
-#      - logs_storage:/var/log/
-#    ports:
-#      - "8700:8700"
-#    develop:
-#      watch:
-#        - action: sync+restart
-#          path: .
-#          target: .
-#    depends_on:
-#      - controller
-#    networks:
-#      - backend
+  rule_engine:
+    build:
+      context: ./rule_engine
+    restart: on-failure
+    volumes:
+      - rule_engine_src:/rule_engine/src
+      - logs_storage:/var/log/
+    ports:
+      - "8700:8700"
+    develop:
+      watch:
+        - action: sync+restart
+          path: .
+          target: .
+    depends_on:
+      - controller
+    networks:
+      - backend
 
   datasim:
     build:
@@ -180,7 +180,7 @@ volumes:
   rabbitmq_data:
   controller_src:
   datasim_src:
-#  rule_engine_src:
+  rule_engine_src:
 #  grafana_storage:
 #  prometheus_data:
   logs_storage:

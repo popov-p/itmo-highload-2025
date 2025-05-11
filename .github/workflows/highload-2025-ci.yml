@@ -1,12 +1,12 @@
-name: LogEntryCI
+name: highload-2025-ci
 
 on:
   push:
     branches:
-      - sonarqube_integration
+      - "467160"
   pull_request:
     branches:
-      - sonarqube_integration
+      - "467160"
 
 jobs:
   test:

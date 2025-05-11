@@ -21,15 +21,24 @@
 Определим формат унифицированного пакета с информацией:
 ```Protobuf
 message Batch {
+    float ker_temp = 1;
+    float ker_load = 2;
+    float mem_temp = 3;
+    float mem_load = 4;
+    string timestamp = 5;
+    GpuInfo gpu_info = 6;
+}
+
+message GpuInfo {
     int32 gpu_id = 1;
-    float ker_temp = 2;
-    float ker_load = 3;
-    float mem_temp = 4;
-    float mem_load = 5;
-    string timestamp = 6;
+    string model = 2;
+    float max_ker_temp = 3;
+    float max_mem_temp = 4;
 }
 ```
-Пакет Batch представляет собой protobuf-сообщение. Библиотека protobuf предоставляет удобные инструменты для сериализации/десериализации сообщений.
+Пакет Batch представляет собой protobuf-сообщение.  
+Сообщение GpuInfo представляет собой protobuf-сообщение 
+Библиотека protobuf предоставляет удобные инструменты для сериализации/десериализации сообщений.
 ### 2. Формирование требований
 #### 2.1 Максимальное количество пользователей, поддерживаемых в каждый момент времени
 - Имеется 1000 видеокарт, и, соответственно, 1000 датчиков-отправителей информации. 

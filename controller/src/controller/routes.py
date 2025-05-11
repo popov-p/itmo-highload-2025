@@ -1,7 +1,9 @@
-from ..proto.messages_pb2 import Batch
+from proto.messages_pb2 import Batch
 from google.protobuf.json_format import MessageToDict
-from .rabbitmq import gpu_channels, create_channel_for_device, rabbitmq_connection
-from fastapi import Request, Response, HTTPException, APIRouter
+from .rabbitmq import rabbitmq_connection
+from .rabbitmq_utils import gpu_channels, create_channel_for_device
+from fastapi import Request, Response, HTTPException
+from .router import router
 from .database import db
 from  .report import metrics_reporter, r, report_key
 import logging
@@ -9,8 +11,6 @@ from prometheus_client import generate_latest, CONTENT_TYPE_LATEST
 from .prometheus import REQUESTS, CPU_USAGE, MEM_USAGE
 import json
 import psutil
-
-router = APIRouter()
 
 @router.get("/metrics")
 def metrics():

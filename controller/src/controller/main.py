@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from .app import app
 from .routes import router
 import logging
 from .report import metrics_reporter
@@ -12,8 +12,6 @@ file_handler = logging.FileHandler('/var/log/controller.log', mode='a')
 file_handler.setFormatter(formatter)
 
 logger.addHandler(file_handler)
-
-app = FastAPI()
 
 @app.on_event("startup")
 async def startup_event():

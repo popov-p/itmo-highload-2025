@@ -26,31 +26,26 @@ pipeline {
             }
         }
 
-        stage('Build application') {
-            agent { 
+        stage('Install dependencies') {
+            agent {
                 docker {
-		    // Put here an image to be used to build the
-		    // application
-                    image 'maven:3.9.4-eclipse-temurin-17-alpine'
-                    // Run the container on the node specified at the
-                    // top-level of the Pipeline, in the same workspace,
-                    // rather than on a new node entirely:
+                    image 'python:3.9-slim'
                     reuseNode true
                     args '-u root'
                 }
             }
             steps {
-		// Extracting workspace which we created
-		// after checkout
                 unstash 'workspace'
-		// Put build script for your application here
-                sh '''
-                    #!/bin/bash
-                    echo "We can run here something, i.e. flake?"
-                '''
+
+                dir('controller') {
+                    sh '''
+                        pip install poetry
+                        poetry install
+                    '''
+                }
             }
         }
-        
+
         stage('Deploy artifacts') {
             agent { 
                 docker {

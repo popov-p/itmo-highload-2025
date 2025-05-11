@@ -3,8 +3,9 @@ from google.protobuf.json_format import MessageToDict
 import time
 import aiormq, asyncio
 from .database import instant, ongoing, db
-from .prometheus import  INSTANT_RULES_COUNTER, ONGOING_RULES_COUNTER
+from .prometheus import  INSTANT_RULES_COUNTER, ONGOING_RULES_COUNTER, CPU_USAGE, MEM_USAGE
 import logging
+import psutil
 
 async def connect_to_rabbitmq():
     while True:
@@ -20,6 +21,12 @@ async def connect_to_rabbitmq():
 
 async def on_message(message: aiormq.abc.DeliveredMessage):
     try:
+        usage = psutil.cpu_percent(interval=None)
+        CPU_USAGE.set(usage)
+
+        mem_usage = psutil.virtual_memory().percent
+        MEM_USAGE.set(mem_usage)
+
         batch = Batch()
         batch.ParseFromString(message.body)
 

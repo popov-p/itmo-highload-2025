@@ -6,13 +6,19 @@ from .database import db
 from  .report import metrics_reporter, r, report_key
 import logging
 from prometheus_client import generate_latest, CONTENT_TYPE_LATEST
-from .prometheus import REQUESTS
+from .prometheus import REQUESTS, CPU_USAGE, MEM_USAGE
 import json
+import psutil
 
 router = APIRouter()
 
 @router.get("/metrics")
 def metrics():
+    cpu_usage = psutil.cpu_percent(interval=None)
+    CPU_USAGE.set(cpu_usage)
+
+    mem_usage = psutil.virtual_memory().percent
+    MEM_USAGE.set(mem_usage)
     return Response(content=generate_latest(), media_type=CONTENT_TYPE_LATEST)
 
 @router.post("/incoming-data")

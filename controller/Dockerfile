@@ -1,5 +1,7 @@
 FROM python:3.12-alpine AS python-base
 
+RUN apk add --no-cache gcc python3-dev musl-dev linux-headers
+
 ENV POETRY_VERSION=1.8.4 \
     POETRY_VENV=/opt/poetry-venv \
     PYTHONUNBUFFERED=1 \

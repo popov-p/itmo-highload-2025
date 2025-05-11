@@ -64,7 +64,6 @@ class RedisMetricsReporter:
         asyncio.create_task(self.send_metrics_to_redis())
 
     def register_graphics_card(self, gpu_info: GpuInfo):
-        logging.info(f"сюда мы дошли а дальше нет")
         gpu_info_key = json.dumps(MessageToDict(gpu_info,
                                                 preserving_proto_field_name=True), sort_keys=True)
         if gpu_info_key not in self.gpu_statistics:

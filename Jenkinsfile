@@ -28,7 +28,7 @@ pipeline {
         stage('Build application') {
             agent {
                 docker {
-                    image 'python:3.12-slim'
+                    image 'docker-builder'
                     reuseNode true
                     args '-u root'
                 }

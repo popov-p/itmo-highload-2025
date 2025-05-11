@@ -44,6 +44,8 @@ services:
           target: .
     depends_on:
       - mongo
+      - redis
+      - rabbitmq
     networks:
       - backend
 

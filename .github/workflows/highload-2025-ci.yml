@@ -50,4 +50,4 @@ jobs:
         run: |
           docker compose up -d controller
           docker compose up -d rule_engine
-          docker compose logs -f &  
+          docker compose logs -f &

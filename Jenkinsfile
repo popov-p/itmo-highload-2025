@@ -29,7 +29,7 @@ pipeline {
         stage('Install dependencies') {
             agent {
                 docker {
-                    image 'python:3.9-slim'
+                    image 'python:3.12-slim'
                     reuseNode true
                     args '-u root'
                 }

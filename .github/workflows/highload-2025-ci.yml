@@ -31,7 +31,8 @@ jobs:
           cd ../rule_engine && poetry install
 
       - name: Run Unit tests
+        env:
+          PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION: python
         run: |
-          PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION=python
           cd controller && poetry run pytest
           cd ../rule_engine && poetry run pytest

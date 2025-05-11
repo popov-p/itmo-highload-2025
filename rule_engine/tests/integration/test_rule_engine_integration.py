@@ -22,7 +22,7 @@ def test_post_and_check_mongo(fixed_batch):
 
 @pytest.mark.integration
 def test_send_multiple_batches_with_same_gpu_id(make_batch):
-    gpu_id = 99  # одинаковый ID
+    gpu_id = 99
     url = "http://localhost:8060/incoming-data"
     headers = {"Content-Type": "application/octet-stream"}
 
@@ -34,7 +34,7 @@ def test_send_multiple_batches_with_same_gpu_id(make_batch):
         requests.post(url, data=binary_data, headers=headers)
 
     time.sleep(2)
-    
+
     client = MongoClient("mongodb://pavel:popov@localhost:27017/")
     db = client["iotdata"]
     ongoing_collection = db["ongoing"]

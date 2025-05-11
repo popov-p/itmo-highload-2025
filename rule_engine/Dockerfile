@@ -19,7 +19,7 @@ COPY --from=poetry-base ${POETRY_VENV} ${POETRY_VENV}
 ENV PATH="${PATH}:${POETRY_VENV}/bin"
 
 WORKDIR /rule_engine
-COPY poetry.lock pyproject.toml README.md entrypoint.sh ./
+COPY pyproject.toml README.md entrypoint.sh ./
 COPY src/ /rule_engine/src/
 RUN poetry lock --no-update && \
     poetry check && poetry install && \

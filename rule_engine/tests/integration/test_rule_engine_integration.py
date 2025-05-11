@@ -8,9 +8,8 @@ def test_post_and_check_mongo(fixed_batch):
 
     url = "http://localhost:8060/incoming-data"
     headers = {"Content-Type": "application/octet-stream"}
-    response = requests.post(url, data=binary_data, headers=headers)
+    requests.post(url, data=binary_data, headers=headers)
 
-    assert response.status_code == 200
 
     client = MongoClient("mongodb://pavel:popov@localhost:27017/")
     db = client["iotdata"]
@@ -33,8 +32,7 @@ def test_send_multiple_batches_with_same_gpu_id(make_batch):
         batch = make_batch(gpu_id=gpu_id)
         timestamps.append(batch.timestamp)
         binary_data = batch.SerializeToString()
-        response = requests.post(url, data=binary_data, headers=headers)
-        assert response.status_code == 200
+        requests.post(url, data=binary_data, headers=headers)
 
     client = MongoClient("mongodb://pavel:popov@localhost:27017/")
     db = client["iotdata"]

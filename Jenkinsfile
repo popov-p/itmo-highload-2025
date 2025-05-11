@@ -26,53 +26,56 @@ pipeline {
             }
         }
 
-        stage('Install dependencies') {
+        stage('Build application') {
             agent {
                 docker {
-                    image 'python:3.12-slim'
+                    image 'docker-builder'
                     reuseNode true
-                    args '-u root'
+                    args '-u root --net="main_bridge" -v /var/run/docker.sock:/var/run/docker.sock'
                 }
             }
             steps {
                 unstash 'workspace'
+                sh '''
+                    #!/bin/bash
+                        set -e
 
-                dir('controller') {
-                    sh '''
-                        pip install poetry
-                        poetry install
-                    '''
-                }
+                        TAG=$(cut -c1-8 < currenntVersion)
+                        echo "------> Building Docker images with tag ${TAG}"
+
+                        docker build -t controller:${TAG} -f controller/Dockerfile controller
+                '''
             }
         }
 
-        stage('Deploy artifacts') {
-            agent { 
-                docker {
-		    // This image contains docker client and 
-		    // docker compose utility, so you can create a container
-		    // with an up built on previous stage
-                    image 'docker-builder'
-                    // Run the container on the node specified at the
-                    // top-level of the Pipeline, in the same workspace,
-                    // rather than on a new node entirely:
-                    reuseNode true
-                    args '-u root --net="main_bridge" -v /var/run/docker.sock:/var/run/docker.sock'
-                } 
-            }
-            steps {
 
-                sh '''
-                    #!/bin/bash
-                    set -e
-
-                    GIT_REVISION=`cat currenntVersion`
-                    # docker build / run ....
-		    # docker-compose ...
-                '''
-            }
-         }
-    }
+//         stage('Deploy artifacts') {
+//             agent {
+//                 docker {
+// 		    // This image contains docker client and
+// 		    // docker compose utility, so you can create a container
+// 		    // with an up built on previous stage
+//                     image 'docker-builder'
+//                     // Run the container on the node specified at the
+//                     // top-level of the Pipeline, in the same workspace,
+//                     // rather than on a new node entirely:
+//                     reuseNode true
+//                     args '-u root --net="main_bridge" -v /var/run/docker.sock:/var/run/docker.sock'
+//                 }
+//             }
+//             steps {
+//
+//                 sh '''
+//                     #!/bin/bash
+//                     set -e
+//
+//                     GIT_REVISION=`cat currenntVersion`
+//                     # docker build / run ....
+// 		    # docker-compose ...
+//                 '''
+//             }
+//          }
+//     }
 
     post {
         always {

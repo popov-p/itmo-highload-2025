@@ -25,12 +25,12 @@ jobs:
           python -m pip install --upgrade pip
           pip install poetry
 
-      - name: Install controller dependencies
+      - name: Install dependencies
         run: |
-          cd controller
-          poetry install
+          cd controller && poetry install
+          cd rule_engine && poetry install
 
-      - name: Run Controller tests
+      - name: Run Unit tests
         run: |
-          cd controller
-          poetry run pytest
+          cd controller && poetry run pytest
+          cd rule_engine && poetry run pytest

@@ -19,6 +19,13 @@ aio-pika = "^9.4.3"
 motor = "^3.6.0"
 prometheus_client = "^0.21.0"
 psutil = "^5.9.8"
+pytest = "^7.4.4"
+
+[tool.pytest.ini_options]
+markers = [
+    "unit: unit tests",
+    "integration: integration tests"
+]
 
 [tool.poetry.scripts]
 rule_engine = 'rule_engine.main:main'

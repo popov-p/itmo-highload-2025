@@ -28,9 +28,9 @@ jobs:
       - name: Install dependencies
         run: |
           cd controller && poetry install
-          cd rule_engine && poetry install
+          cd ../rule_engine && poetry install
 
       - name: Run Unit tests
         run: |
           cd controller && poetry run pytest
-          cd rule_engine && poetry run pytest
+          cd ../rule_engine && poetry run pytest

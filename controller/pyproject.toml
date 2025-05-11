@@ -21,6 +21,7 @@ prometheus_client = "^0.21.0"
 redis = "^5.2.1"
 pydantic = "^2.10.6"
 psutil = "^5.9.8"
+pytest = "^7.4.4"
 
 [tool.pytest.ini_options]
 markers = [

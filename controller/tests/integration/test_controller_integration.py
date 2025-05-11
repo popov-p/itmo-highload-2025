@@ -2,10 +2,10 @@ import requests
 import pytest
 
 @pytest.mark.integration
-def test_post_binary_protobuf(random_batch):
+def test_post_binary_protobuf(fixed_batch):
     url = "http://localhost:8060/incoming-data"
 
-    binary_data = random_batch.SerializeToString()
+    binary_data = fixed_batch.SerializeToString()
 
     response = requests.post(url, data=binary_data)
 

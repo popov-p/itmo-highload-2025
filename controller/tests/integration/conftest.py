@@ -3,7 +3,7 @@ from proto.messages_pb2 import Batch, GpuInfo
 import time
 
 @pytest.fixture
-def random_batch():
+def fixed_batch():
     gpu_id = 3
     gpu_info = GpuInfo(
         gpu_id=gpu_id,

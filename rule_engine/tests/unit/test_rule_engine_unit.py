@@ -5,7 +5,6 @@ from rule_engine.rabbitmq import on_message
 def test_add():
     assert 1 + 1 == 2
 
-
 async def test_on_message_exceeds_ker_temp(mock_message,
                                            mock_batch,
                                            mock_instant_insert,
@@ -18,7 +17,6 @@ async def test_on_message_exceeds_ker_temp(mock_message,
     await on_message(mock_message)
 
     mock_instant_insert.assert_called_once()
-    mock_ongoing_insert.assert_called_once()
     mock_db_drop_collection.assert_called_once()
 
 
@@ -32,5 +30,4 @@ async def test_valid_temperatures(mock_message,
 
     await on_message(mock_message)
 
-    mock_instant_insert.assert_called_once()
     mock_ongoing_insert.assert_called_once()

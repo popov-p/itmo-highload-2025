@@ -59,11 +59,12 @@
 ### CI. Github Workflows
 Реализовано `unit` тестирования при помощи `pytest` и `unittest.mock`.
 Реализовано интеграционное тестирование при помощи `pytest`, `docker`.
-Реализованы проверки на каждую `HTTPException`, а также на срабатывание бизнес-логики
+Реализованы проверки на каждую `HTTPException`, а также на срабатывание бизнес-логики `rule_engine`:
 `instant-rules`, `ongoing rules`.
+![grafana-alerts](./docs/AHLA-3-CI.png)
 ### Выгрузка образов в DockerHub 
 Настроена автоматическая выгрузка контейнеров в DockerHub
 
 - Ongoing rules counter
-![grafana-alerts](./docs/AHLA-3-docker-hub.png)
+![docker-hub](./docs/AHLA-3-docker-hub.png)
 - 

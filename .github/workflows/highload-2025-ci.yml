@@ -46,7 +46,7 @@ jobs:
           cd controller && poetry run pytest
           cd ../rule_engine && poetry run pytest
 
-      - name: Run Integrarion tests
+      - name: Run Containers for integration tests
         run: |
           docker compose up -d controller
           docker compose up -d rule_engine

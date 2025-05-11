@@ -26,6 +26,9 @@ async def incoming_data(request: Request):
     try:
         REQUESTS.inc()
         body = await request.body()
+        if not body:
+                raise HTTPException(status_code=500, detail="Request body is empty")
+
         batch = Batch()
         batch.ParseFromString(body)
         logging.info(f"Получен пакет: {batch}")

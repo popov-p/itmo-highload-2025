@@ -3,6 +3,8 @@ from proto.messages_pb2 import Batch
 from unittest import mock
 from controller.database import db
 
+
+@pytest.mark.unit
 def test_incoming_data(client, mock_db_insert, mock_create_channel_for_device):
     batch = Batch()
     batch.gpu_info.gpu_id = 1
@@ -28,12 +30,14 @@ def test_incoming_data(client, mock_db_insert, mock_create_channel_for_device):
     assert response.status_code == 200
     assert response.json() == {"status": "Ok"}
 
+@pytest.mark.unit
 def test_incoming_data_empty_body(client):
     response = client.post("/incoming-data", content=b'')
 
     assert response.status_code == 500
     assert response.json() == {"detail": "Empty request body"}
 
+@pytest.mark.unit
 def test_incoming_data_invalid_string(client):
     response = client.post("/incoming-data", content=b'Invalid string data')
 
@@ -41,6 +45,7 @@ def test_incoming_data_invalid_string(client):
     assert response.json() == {"detail": "Failed to parse request body"}
 
 
+@pytest.mark.unit
 def test_mock_report(client):
     response = client.get("/report")
 

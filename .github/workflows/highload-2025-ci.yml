@@ -43,11 +43,16 @@ jobs:
         env:
           PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION: python
         run: |
-          cd controller && poetry run pytest
-          cd ../rule_engine && poetry run pytest
+          cd controller && poetry run pytest -m unit
+          cd ../rule_engine && poetry run pytest -m unit
 
-      - name: Run Containers for integration tests
+      - name: Integration tests
+        env:
+          PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION: python
         run: |
           docker compose up -d controller
           docker compose up -d rule_engine
           docker compose logs -f &
+          
+          cd controller && poetry run pytest -m integration
+          cd ../rule_engine && poetry run pytest -m integration

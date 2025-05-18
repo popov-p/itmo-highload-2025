@@ -5,6 +5,7 @@ import signal
 import logging
 import time
 import random
+import base64
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -68,8 +69,14 @@ class DataSimulator:
                         f"timestamp: {batch.timestamp}"
                     )
 
+                    serialized_batch = batch.SerializeToString()
+                    encoded = base64.b64encode(serialized_batch).decode('ascii')
+
+
+                    logging.info(f"encoded batch ----->: {encoded}")
+
                     try:
-                        async with session.post(url, data=batch.SerializeToString()) as response:
+                        async with session.post(url, data=encoded) as response:
                             if response.status == 200:
                                 logging.info(f"Ответ от IOT контроллера: {await response.text()}")
                             else:

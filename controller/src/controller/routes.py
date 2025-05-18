@@ -11,21 +11,29 @@ from prometheus_client import generate_latest, CONTENT_TYPE_LATEST
 from .prometheus import REQUESTS, CPU_USAGE, MEM_USAGE
 import json
 import psutil
+import base64
 
 @router.get("/metrics")
 def metrics():
-    cpu_usage = psutil.cpu_percent(interval=None)
-    CPU_USAGE.set(cpu_usage)
+    process = psutil.Process()
 
-    mem_usage = psutil.virtual_memory().percent
-    MEM_USAGE.set(mem_usage)
+    cpu_usage = process.cpu_percent(interval=1)
+    CPU_USAGE.set(cpu_usage)
+    logging.info(f"Использование CPU: {cpu_usage}, %")
+
+    mem_usage_mb = process.memory_info().rss / (1024 * 1024)
+    MEM_USAGE.set(mem_usage_mb)
+    logging.info(f"Памяти занято в МБ: {mem_usage_mb}")
+
     return Response(content=generate_latest(), media_type=CONTENT_TYPE_LATEST)
 
 @router.post("/incoming-data")
 async def incoming_data(request: Request):
     try:
         REQUESTS.inc()
-        body = await request.body()
+        encoded_body = await request.body()
+        body = base64.b64decode(encoded_body)
+
         if not body:
                 raise HTTPException(status_code=500, detail="Request body is empty")
 

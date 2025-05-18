@@ -22,7 +22,7 @@ import base64
 #
 #     count = collection.count_documents({})
 #     assert count > 0, "Коллекция пуста, записи не найдены"
-#
+
 # @pytest.mark.integration
 # def test_send_multiple_batches_with_same_gpu_id(make_batch):
 #     gpu_id = 99

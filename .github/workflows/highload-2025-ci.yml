@@ -100,20 +100,27 @@ jobs:
       - name: Install tsung
         run: |
           sudo apt install tsung
-      - name: Load tests,
+
+      - name: Load tests. Many clients, Few requests
         run: |
           docker compose up -d controller
           docker compose up -d rule_engine
           docker compose logs -f &
-          tsung -f ./tsung/many-requests-few-clients.xml start
+        
+          TSUNG_OUTPUT=$(tsung -f ./tsung/many-clients-few-requests.xml start)
+          echo "$TSUNG_OUTPUT"
+        
+          TSUNG_LOG_DIR=$(echo "$TSUNG_OUTPUT" | grep 'Log directory is:' | awk -F': ' '{print $2}')
+          echo "TSUNG_LOG_DIR=$TSUNG_LOG_DIR" >> $GITHUB_ENV
+          echo "Tsung log directory: $TSUNG_LOG_DIR"
 
-      - name: Create dummy report
+      - name: Archive Tsung logs
         run: |
-         mkdir -p reports
-         echo "Stub test report" > reports/stub.txt
+          mkdir -p reports
+          cp -r "$TSUNG_LOG_DIR" reports/tsung-logs
 
-      - name: Upload test results as an artifact
+      - name: Upload Tsung logs as artifact
         uses: actions/upload-artifact@v4
         with:
-          name: test-results
-          path: reports/stub.txt
+          name: tsung-logs
+          path: reports/tsung-logs

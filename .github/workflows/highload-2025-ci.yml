@@ -113,6 +113,7 @@ jobs:
           TSUNG_LOG_DIR=$(echo "$TSUNG_OUTPUT" | grep 'Log directory is:' | awk -F': ' '{print $2}')
           echo "TSUNG_LOG_DIR=$TSUNG_LOG_DIR" >> $GITHUB_ENV
           echo "Tsung log directory: $TSUNG_LOG_DIR"
+          cd $TSUNG_LOG_DIR && usr/lib/x86_64-linux-gnu/tsung/bin/tsung_stats.pl
 
       - name: Archive Tsung logs
         run: |

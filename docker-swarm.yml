@@ -29,62 +29,37 @@ services:
       - backend
 
   controller:
-    build:
-      context: ./controller
-    restart: on-failure
+    image: highload-2025-controller:latest
     volumes:
       - controller_src:/controller/src
       - logs_storage:/var/log/
-    develop:
-      watch:
-        - action: sync+restart
-          path: .
-          target: .
     depends_on:
       - mongo
       - redis
       - rabbitmq
+    deploy:
+      replicas: 2
+      restart_policy:
+        condition: on-failure
     networks:
       - backend
 
   rule_engine:
-    build:
-      context: ./rule_engine
-    restart: on-failure
+    image: highload-2025-rule_engine:latest
     volumes:
       - rule_engine_src:/rule_engine/src
       - logs_storage:/var/log/
     ports:
       - "8700:8700"
-    develop:
-      watch:
-        - action: sync+restart
-          path: .
-          target: .
     depends_on:
       - controller
       - mongo
       - redis
       - rabbitmq
-    networks:
-      - backend
-
-  datasim:
-    build:
-      context: ./datasim
-    restart: always
-    volumes:
-      - datasim_src:/datasim/src
-      - logs_storage:/var/log/
-    ports:
-      - "8070:8070"
-    develop:
-      watch:
-        - action: sync+restart
-          path: .
-          target: .
-    depends_on:
-      - rule_engine
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
     networks:
       - backend
 
@@ -92,7 +67,6 @@ services:
     image: grafana/grafana:latest
     depends_on:
       - prometheus
-    restart: unless-stopped
     ports:
       - '3000:3000'
     volumes:
@@ -110,42 +84,6 @@ services:
     networks:
       - backend
 
-#  elasticsearch:
-#    image: elasticsearch:8.15.3
-#    environment:
-#      - discovery.type=single-node
-#      - xpack.security.enabled=false
-#    ports:
-#      - "9200:9200"
-#    restart: on-failure
-#    networks:
-#      - backend
-#
-#  logstash:
-#    image: logstash:8.15.3
-#    ports:
-#      - "5044:5044"
-#      - "9600:9600"
-#    volumes:
-#      - ./logstash.conf:/usr/share/logstash/pipeline/logstash.conf
-#    networks:
-#      - backend
-#    restart: on-failure
-#    depends_on:
-#      - elasticsearch
-#
-#  kibana:
-#    image: kibana:8.15.3
-#    ports:
-#      - "5601:5601"
-#    environment:
-#      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
-#    networks:
-#      - backend
-#    restart: on-failure
-#    depends_on:
-#      - elasticsearch
-
   filebeat:
     image: elastic/filebeat:8.15.3
     volumes:
@@ -153,7 +91,6 @@ services:
       - logs_storage:/var/log
     networks:
       - backend
-    restart: on-failure
 
   redis:
     image: redis:latest
@@ -161,7 +98,6 @@ services:
       - "6379:6379"
     networks:
       - backend
-    restart: on-failure
 
   nginx:
     image: nginx:latest
@@ -179,7 +115,6 @@ volumes:
   mongo_data:
   rabbitmq_data:
   controller_src:
-  datasim_src:
   rule_engine_src:
   grafana_storage:
   prometheus_data:
@@ -187,4 +122,4 @@ volumes:
 
 networks:
   backend:
-    driver: bridge
+    driver: overlay

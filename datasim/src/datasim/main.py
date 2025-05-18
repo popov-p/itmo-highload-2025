@@ -22,8 +22,7 @@ logger.addHandler(file_handler)
 logger.addHandler(console_handler)
 
 
-# url = "http://nginx/incoming-data"
-url = "http://controller:8060/incoming-data"
+url = "http://nginx/incoming-data"
 
 registered_gpus = {}
 
@@ -73,7 +72,7 @@ class DataSimulator:
                     encoded = base64.b64encode(serialized_batch).decode('ascii')
 
 
-                    logging.info(f"encoded batch ----->: {encoded}")
+                    logging.info(f"encoded batch ----->>: {encoded}")
 
                     try:
                         async with session.post(url, data=encoded) as response:

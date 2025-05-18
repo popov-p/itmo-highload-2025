@@ -9,7 +9,7 @@ def test_post_and_check_mongo(fixed_batch):
     binary_data = fixed_batch.SerializeToString()
     encoded = base64.b64encode(binary_data).decode('ascii')
 
-    url = "http://localhost:8060/incoming-data"
+    url = "http://localhost:80/incoming-data"
     headers = {"Content-Type": "application/octet-stream"}
     requests.post(url, data=encoded, headers=headers)
 
@@ -26,7 +26,7 @@ def test_post_and_check_mongo(fixed_batch):
 @pytest.mark.integration
 def test_send_multiple_batches_with_same_gpu_id(make_batch):
     gpu_id = 99
-    url = "http://localhost:8060/incoming-data"
+    url = "http://localhost:80/incoming-data"
     headers = {"Content-Type": "application/octet-stream"}
 
     timestamps = []

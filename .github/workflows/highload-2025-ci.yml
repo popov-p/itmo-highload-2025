@@ -51,6 +51,7 @@ jobs:
         env:
           PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION: python
         run: |
+          docker compose up -d nginx
           docker compose up -d controller
           docker compose up -d rule_engine
           docker compose logs -f &

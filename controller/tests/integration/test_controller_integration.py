@@ -4,7 +4,7 @@ import base64
 
 @pytest.mark.integration
 def test_post_binary_protobuf(fixed_batch):
-    url = "http://localhost:8060/incoming-data"
+    url = "http://localhost:80/incoming-data"
 
     binary_data = fixed_batch.SerializeToString()
     encoded = base64.b64encode(binary_data).decode('ascii')
@@ -14,7 +14,7 @@ def test_post_binary_protobuf(fixed_batch):
 
 @pytest.mark.integration
 def test_post_empty_body():
-    url = "http://localhost:8060/incoming-data"
+    url = "http://localhost:80/incoming-data"
 
     response = requests.post(url, data=b"")
 
@@ -23,7 +23,7 @@ def test_post_empty_body():
 
 @pytest.mark.integration
 def test_get_report():
-    url = "http://localhost:8060/report"
+    url = "http://localhost:80/report"
 
     response = requests.post(url, data=b"")
 

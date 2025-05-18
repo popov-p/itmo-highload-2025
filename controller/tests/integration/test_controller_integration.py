@@ -8,7 +8,7 @@ def test_post_binary_protobuf(fixed_batch):
 
     binary_data = fixed_batch.SerializeToString()
     encoded = base64.b64encode(binary_data).decode('ascii')
-    
+
     response = requests.post(url, data=encoded)
 
     assert response.status_code == 200

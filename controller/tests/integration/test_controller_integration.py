@@ -1,13 +1,15 @@
 import requests
 import pytest
+import base64
 
 @pytest.mark.integration
 def test_post_binary_protobuf(fixed_batch):
     url = "http://localhost:8060/incoming-data"
 
     binary_data = fixed_batch.SerializeToString()
-
-    response = requests.post(url, data=binary_data)
+    encoded = base64.b64encode(binary_data).decode('ascii')
+    
+    response = requests.post(url, data=encoded)
 
     assert response.status_code == 200
 

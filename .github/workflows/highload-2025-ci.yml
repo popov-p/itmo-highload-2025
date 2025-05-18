@@ -58,7 +58,13 @@ jobs:
           cd controller && poetry run pytest -m integration
           cd ../rule_engine && poetry run pytest -m integration
 
-      - name: Load tests. Many clients, Few requests
+      - name: Install tsung
+        run: |
+          sudo apt install tsung
+
+      #--------------------------------------------------------
+
+      - name: Load tests -- Many clients, Few requests
         run: |
           TSUNG_OUTPUT=$(tsung -f ./tsung/many-clients-few-requests.xml start)
           echo "$TSUNG_OUTPUT"
@@ -67,16 +73,40 @@ jobs:
           echo "TSUNG_LOG_DIR=$TSUNG_LOG_DIR" >> $GITHUB_ENV
           echo "Tsung log directory: $TSUNG_LOG_DIR"
 
-      - name: Archive Tsung logs
+      - name: Archive Tsung logs -- Many clients, Few requests
         run: |
           mkdir -p reports
-          cp -r "$TSUNG_LOG_DIR" reports/tsung-logs
+          cp -r "$TSUNG_LOG_DIR" reports/tsung-many-clients-few-requests-logs
 
-      - name: Upload Tsung logs as artifact
+      - name: Upload Tsung logs as artifact -- Many clients, Few requests
         uses: actions/upload-artifact@v4
         with:
           name: tsung-many-clients-few-requests-logs
           path: reports/tsung-many-clients-few-requests-logs
+
+      #--------------------------------------------------------
+
+      - name: Load tests -- Many requests, Few clients
+        run: |
+          TSUNG_OUTPUT=$(tsung -f ./tsung/many-requests-few-clients.xml start)
+          echo "$TSUNG_OUTPUT"
+
+          TSUNG_LOG_DIR=$(echo "$TSUNG_OUTPUT" | grep 'Log directory is:' | awk -F': ' '{print $2}')
+          echo "TSUNG_LOG_DIR=$TSUNG_LOG_DIR" >> $GITHUB_ENV
+          echo "Tsung log directory: $TSUNG_LOG_DIR"
+
+      - name: Archive Tsung logs -- Many requests, Few clients
+        run: |
+          mkdir -p reports
+          cp -r "$TSUNG_LOG_DIR" reports/tsung-many-requests-few-clients-logs
+
+      - name: Upload Tsung logs as artifact -- Many requests, Few clients
+        uses: actions/upload-artifact@v4
+        with:
+          name: tsung-many-requests-few-clients-logs
+          path: reports/tsung-many-requests-few-clients-logs
+
+      
 
 #  publish:
 #    name: publish

@@ -106,7 +106,27 @@ jobs:
           name: tsung-many-requests-few-clients-logs
           path: reports/tsung-many-requests-few-clients-logs
 
-      
+      #--------------------------------------------------------
+
+      - name: Load tests -- Many requests, Many clients
+        run: |
+          TSUNG_OUTPUT=$(tsung -f ./tsung/many-requests-many-clients.xml start)
+          echo "$TSUNG_OUTPUT"
+
+          TSUNG_LOG_DIR=$(echo "$TSUNG_OUTPUT" | grep 'Log directory is:' | awk -F': ' '{print $2}')
+          echo "TSUNG_LOG_DIR=$TSUNG_LOG_DIR" >> $GITHUB_ENV
+          echo "Tsung log directory: $TSUNG_LOG_DIR"
+
+      - name: Archive Tsung logs -- Many requests, Many clients
+        run: |
+          mkdir -p reports
+          cp -r "$TSUNG_LOG_DIR" reports/tsung-many-requests-many-clients-logs
+
+      - name: Upload Tsung logs as artifact -- Many requests, Many clients
+        uses: actions/upload-artifact@v4
+        with:
+          name: tsung-many-requests-many-clients-logs
+          path: reports/tsung-many-requests-many-clients-logs
 
 #  publish:
 #    name: publish

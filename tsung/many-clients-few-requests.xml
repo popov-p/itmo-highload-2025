@@ -6,7 +6,7 @@
   </clients>
 
   <servers>
-    <server host="localhost" port="8060" type="tcp"/>
+    <server host="localhost" port="80" type="tcp"/>
   </servers>
 
   <load>
@@ -20,7 +20,7 @@
     <sessions>
     <session name="load_test" probability="100" type="ts_http">
       <request>
-        <http url="http://localhost:8060/incoming-data" method="POST"
+        <http url="http://localhost:80/incoming-data" method="POST"
               contents="DbkYpUIV+ywhQR0yWp5CJS+XnUIqETE3NDc1Njk1NjkuMTQ4NTEzMhUIARIHVElUQU4gVh0AAL5CJQAA3kI="/>
       </request>
     </session>

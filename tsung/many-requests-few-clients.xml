@@ -6,7 +6,7 @@
   </clients>
 
   <servers>
-    <server host="localhost" port="8060" type="tcp"/>
+    <server host="localhost" port="80" type="tcp"/>
   </servers>
 
   <load>
@@ -22,7 +22,7 @@
 
       <for from="1" to="200" incr="1" var="counter">
           <request subst="true">
-            <http url="http://localhost:8060/incoming-data" method="POST"
+            <http url="http://localhost:80/incoming-data" method="POST"
                   contents="DbkYpUIV+ywhQR0yWp5CJS+XnUIqETE3NDc1Njk1NjkuMTQ4NTEzMhUIARIHVElUQU4gVh0AAL5CJQAA3kI="/>
           </request>
           <thinktime value="0.1"/>

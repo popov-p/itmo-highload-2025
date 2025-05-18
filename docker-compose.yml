@@ -65,6 +65,9 @@ services:
           target: .
     depends_on:
       - controller
+      - mongo
+      - redis
+      - rabbitmq
     networks:
       - backend
 

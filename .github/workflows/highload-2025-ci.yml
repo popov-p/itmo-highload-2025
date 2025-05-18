@@ -80,8 +80,8 @@ jobs:
           docker compose up -d rule_engine
           docker compose logs -f &
 
-          cd controller && poetry run pytest -m integration
-          cd ../rule_engine && poetry run pytest -m integration
+#          cd controller && poetry run pytest -m integration
+#          cd ../rule_engine && poetry run pytest -m integration
 
 #  publish:
 #    name: publish

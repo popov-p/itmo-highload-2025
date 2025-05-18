@@ -108,89 +108,56 @@ jobs:
 
       #--------------------------------------------------------
 
-      - name: Load tests -- Many requests, Many clients
+      - name: Load tests -- Many clients, Many requests
         run: |
-          TSUNG_OUTPUT=$(tsung -f ./tsung/many-requests-many-clients.xml start)
+          TSUNG_OUTPUT=$(tsung -f ./tsung/many-clients-many-requests.xml start)
           echo "$TSUNG_OUTPUT"
 
           TSUNG_LOG_DIR=$(echo "$TSUNG_OUTPUT" | grep 'Log directory is:' | awk -F': ' '{print $2}')
           echo "TSUNG_LOG_DIR=$TSUNG_LOG_DIR" >> $GITHUB_ENV
           echo "Tsung log directory: $TSUNG_LOG_DIR"
 
-      - name: Archive Tsung logs -- Many requests, Many clients
+      - name: Archive Tsung logs -- Many clients, Many requests
         run: |
           mkdir -p reports
-          cp -r "$TSUNG_LOG_DIR" reports/tsung-many-requests-many-clients-logs
+          cp -r "$TSUNG_LOG_DIR" reports/tsung-many-clients-many-requests-logs
 
-      - name: Upload Tsung logs as artifact -- Many requests, Many clients
+      - name: Upload Tsung logs as artifact -- Many clients, Many requests
         uses: actions/upload-artifact@v4
         with:
-          name: tsung-many-requests-many-clients-logs
-          path: reports/tsung-many-requests-many-clients-logs
+          name: tsung-many-clients-many-requests-logs
+          path: reports/tsung-many-clients-many-requests-logs
 
-#  publish:
-#    name: publish
-#    needs: test
-#    runs-on: ubuntu-22.04
-#    steps:
-#      - name: Checkout repository
-#        uses: actions/checkout@v4
-#
-#      - name: Set Docker tag
-#        id: vars
-#        run: echo "TAG=1.0.${{ github.run_number }}" >> $GITHUB_ENV
-#
-#      - name: Build controller
-#        run: |
-#          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/controller:${{ env.TAG }} ./controller
-#
-#      - name: Build rule engine
-#        run: |
-#          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/rule_engine:${{ env.TAG }} ./rule_engine
-#
-#      - name: Log in to Docker Hub
-#        uses: docker/login-action@v3
-#        with:
-#          username: ${{ secrets.DOCKERHUB_USERNAME }}
-#          password: ${{ secrets.DOCKERHUB_TOKEN }}
-#
-#      - name: Push controller
-#        run: |
-#          docker push ${{ secrets.DOCKERHUB_USERNAME }}/controller:${{ env.TAG }}
-#
-#      - name: Push rule_engine
-#        run: |
-#          docker push ${{ secrets.DOCKERHUB_USERNAME }}/rule_engine:${{ env.TAG }}
+  publish:
+    name: publish
+    needs: test
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-#  load-test:
-#    runs-on: ubuntu-22.04
-#    steps:
-#      - name: Checkout repository
-#        uses: actions/checkout@v4
-#      - name: Install tsung
-#        run: |
-#          sudo apt install tsung
-#
-#      - name: Load tests. Many clients, Few requests
-#        run: |
-#          docker compose up -d controller
-#          docker compose up -d rule_engine
-#          docker compose logs -f &
-#
-#          TSUNG_OUTPUT=$(tsung -f ./tsung/many-clients-few-requests.xml start)
-#          echo "$TSUNG_OUTPUT"
-#
-#          TSUNG_LOG_DIR=$(echo "$TSUNG_OUTPUT" | grep 'Log directory is:' | awk -F': ' '{print $2}')
-#          echo "TSUNG_LOG_DIR=$TSUNG_LOG_DIR" >> $GITHUB_ENV
-#          echo "Tsung log directory: $TSUNG_LOG_DIR"
-#
-#      - name: Archive Tsung logs
-#        run: |
-#          mkdir -p reports
-#          cp -r "$TSUNG_LOG_DIR" reports/tsung-logs
-#
-#      - name: Upload Tsung logs as artifact
-#        uses: actions/upload-artifact@v4
-#        with:
-#          name: tsung-logs
-#          path: reports/tsung-logs
+      - name: Set Docker tag
+        id: vars
+        run: echo "TAG=1.0.${{ github.run_number }}" >> $GITHUB_ENV
+
+      - name: Build controller
+        run: |
+          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/controller:${{ env.TAG }} ./controller
+
+      - name: Build rule engine
+        run: |
+          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/rule_engine:${{ env.TAG }} ./rule_engine
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Push controller
+        run: |
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/controller:${{ env.TAG }}
+
+      - name: Push rule_engine
+        run: |
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/rule_engine:${{ env.TAG }}

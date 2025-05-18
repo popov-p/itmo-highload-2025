@@ -9,78 +9,74 @@ on:
       - "467160"
 
 jobs:
-#  build:
-#    runs-on: ubuntu-22.04
-#    steps:
-#      - name: Checkout code
-#        uses: actions/checkout@v3
-#
-#      - name: Build Docker images
-#        run: docker compose build
-#
-#  test:
-#    runs-on: ubuntu-22.04
-#    needs: build
-#    steps:
-#      - name: Checkout code
-#        uses: actions/checkout@v3
-#
-#      - name: Set up Python
-#        uses: actions/setup-python@v5
-#        with:
-#          python-version: '3.12'
-#
-#      - name: Upgrade pip and install Poetry via pip
-#        run: |
-#          python -m pip install --upgrade pip
-#          pip install poetry
-#
-#      - name: Install dependencies
-#        run: |
-#          cd controller && poetry install
-#          cd ../rule_engine && poetry install
-#
-#      - name: Run Unit tests
-#        env:
-#          PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION: python
-#        run: |
-#          cd controller && poetry run pytest -m unit
-#          cd ../rule_engine && poetry run pytest -m unit
-#
-#      - name: Integration tests
-#        env:
-#          PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION: python
-#        run: |
-#          docker compose up -d controller
-#          docker compose up -d rule_engine
-#          docker compose logs -f &
-#
-#      - name: Load tests. Many clients, Few requests
-#        run: |
-#          docker compose up -d controller
-#          docker compose up -d rule_engine
-#          docker compose logs -f &
-#
-#          TSUNG_OUTPUT=$(tsung -f ./tsung/many-clients-few-requests.xml start)
-#          echo "$TSUNG_OUTPUT"
-#
-#          TSUNG_LOG_DIR=$(echo "$TSUNG_OUTPUT" | grep 'Log directory is:' | awk -F': ' '{print $2}')
-#          echo "TSUNG_LOG_DIR=$TSUNG_LOG_DIR" >> $GITHUB_ENV
-#          echo "Tsung log directory: $TSUNG_LOG_DIR"
-#
-#      - name: Archive Tsung logs
-#        run: |
-#          mkdir -p reports
-#          cp -r "$TSUNG_LOG_DIR" reports/tsung-logs
-#
-#      - name: Upload Tsung logs as artifact
-#        uses: actions/upload-artifact@v4
-#        with:
-#          name: tsung-many-clients-few-requests-logs
-#          path: reports/tsung-many-clients-few-requests-logs
+  build:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-#          cd controller && poetry run pytest -m integration
-#          cd ../rule_engine && poetry run pytest -m integration
+      - name: Build Docker images
+        run: docker compose build
+
+  test:
+    runs-on: ubuntu-22.04
+    needs: build
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Upgrade pip and install Poetry via pip
+        run: |
+          python -m pip install --upgrade pip
+          pip install poetry
+
+      - name: Install dependencies
+        run: |
+          cd controller && poetry install
+          cd ../rule_engine && poetry install
+
+      - name: Run Unit tests
+        env:
+          PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION: python
+        run: |
+          cd controller && poetry run pytest -m unit
+          cd ../rule_engine && poetry run pytest -m unit
+
+      - name: Integration tests
+        env:
+          PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION: python
+        run: |
+          docker compose up -d controller
+          docker compose up -d rule_engine
+          docker compose logs -f &
+          
+          cd controller && poetry run pytest -m integration
+          cd ../rule_engine && poetry run pytest -m integration
+
+      - name: Load tests. Many clients, Few requests
+        run: |
+          TSUNG_OUTPUT=$(tsung -f ./tsung/many-clients-few-requests.xml start)
+          echo "$TSUNG_OUTPUT"
+
+          TSUNG_LOG_DIR=$(echo "$TSUNG_OUTPUT" | grep 'Log directory is:' | awk -F': ' '{print $2}')
+          echo "TSUNG_LOG_DIR=$TSUNG_LOG_DIR" >> $GITHUB_ENV
+          echo "Tsung log directory: $TSUNG_LOG_DIR"
+
+      - name: Archive Tsung logs
+        run: |
+          mkdir -p reports
+          cp -r "$TSUNG_LOG_DIR" reports/tsung-logs
+
+      - name: Upload Tsung logs as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: tsung-many-clients-few-requests-logs
+          path: reports/tsung-many-clients-few-requests-logs
 
 #  publish:
 #    name: publish
@@ -116,35 +112,35 @@ jobs:
 #        run: |
 #          docker push ${{ secrets.DOCKERHUB_USERNAME }}/rule_engine:${{ env.TAG }}
 
-  load-test:
-    runs-on: ubuntu-22.04
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-      - name: Install tsung
-        run: |
-          sudo apt install tsung
-
-      - name: Load tests. Many clients, Few requests
-        run: |
-          docker compose up -d controller
-          docker compose up -d rule_engine
-          docker compose logs -f &
-
-          TSUNG_OUTPUT=$(tsung -f ./tsung/many-clients-few-requests.xml start)
-          echo "$TSUNG_OUTPUT"
-
-          TSUNG_LOG_DIR=$(echo "$TSUNG_OUTPUT" | grep 'Log directory is:' | awk -F': ' '{print $2}')
-          echo "TSUNG_LOG_DIR=$TSUNG_LOG_DIR" >> $GITHUB_ENV
-          echo "Tsung log directory: $TSUNG_LOG_DIR"
-
-      - name: Archive Tsung logs
-        run: |
-          mkdir -p reports
-          cp -r "$TSUNG_LOG_DIR" reports/tsung-logs
-
-      - name: Upload Tsung logs as artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: tsung-logs
-          path: reports/tsung-logs
+#  load-test:
+#    runs-on: ubuntu-22.04
+#    steps:
+#      - name: Checkout repository
+#        uses: actions/checkout@v4
+#      - name: Install tsung
+#        run: |
+#          sudo apt install tsung
+#
+#      - name: Load tests. Many clients, Few requests
+#        run: |
+#          docker compose up -d controller
+#          docker compose up -d rule_engine
+#          docker compose logs -f &
+#
+#          TSUNG_OUTPUT=$(tsung -f ./tsung/many-clients-few-requests.xml start)
+#          echo "$TSUNG_OUTPUT"
+#
+#          TSUNG_LOG_DIR=$(echo "$TSUNG_OUTPUT" | grep 'Log directory is:' | awk -F': ' '{print $2}')
+#          echo "TSUNG_LOG_DIR=$TSUNG_LOG_DIR" >> $GITHUB_ENV
+#          echo "Tsung log directory: $TSUNG_LOG_DIR"
+#
+#      - name: Archive Tsung logs
+#        run: |
+#          mkdir -p reports
+#          cp -r "$TSUNG_LOG_DIR" reports/tsung-logs
+#
+#      - name: Upload Tsung logs as artifact
+#        uses: actions/upload-artifact@v4
+#        with:
+#          name: tsung-logs
+#          path: reports/tsung-logs

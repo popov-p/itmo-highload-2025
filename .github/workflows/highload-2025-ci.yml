@@ -66,66 +66,56 @@ jobs:
         run: |
           docker exec itmo-highload-2025-tsung-1 tsung -f ./scenarios/many-clients-few-requests.xml start
 
-      - name: Get Tsung log directory
+      - name: Get Tsung log directory -- Many clients, Few requests
         run: |
           TSUNG_LOG_DIR=$(docker exec itmo-highload-2025-tsung-1 sh -c 'ls -td /root/.tsung/log/* | head -n 1')
           echo "Found Tsung log dir: $TSUNG_LOG_DIR"
           echo "TSUNG_LOG_DIR=$TSUNG_LOG_DIR" >> $GITHUB_ENV
 
-      - name: Copy logs from container to host
+      - name: Copy logs from container to host -- Many requests, Few clients
         run: |
           mkdir -p reports
           docker cp itmo-highload-2025-tsung-1:$TSUNG_LOG_DIR ./reports/tsung-many-clients-few-requests-logs
 
+      #--------------------------------------------------------
+
+      - name: Load tests -- Many requests, Few clients
+        run: |
+          docker exec itmo-highload-2025-tsung-1 tsung -f ./scenarios/many-requests-few-clients.xml start
+
+      - name: Get Tsung log directory -- Many requests, Few clients
+        run: |
+          TSUNG_LOG_DIR=$(docker exec itmo-highload-2025-tsung-1 sh -c 'ls -td /root/.tsung/log/* | head -n 1')
+          echo "Found Tsung log dir: $TSUNG_LOG_DIR"
+          echo "TSUNG_LOG_DIR=$TSUNG_LOG_DIR" >> $GITHUB_ENV
+
+      - name: Copy logs from container to host -- Many requests, Few clients
+        run: |
+          docker cp itmo-highload-2025-tsung-1:$TSUNG_LOG_DIR ./reports/tsung-many-requests-few-clients-logs
+
+      #--------------------------------------------------------
+
+      - name: Load tests -- Many clients, Many requests
+        run: |
+          docker exec itmo-highload-2025-tsung-1 tsung -f ./scenarios/many-clients-many-requests.xml start
+
+      - name: Get Tsung log directory -- Many requests, Few clients
+        run: |
+          TSUNG_LOG_DIR=$(docker exec itmo-highload-2025-tsung-1 sh -c 'ls -td /root/.tsung/log/* | head -n 1')
+          echo "Found Tsung log dir: $TSUNG_LOG_DIR"
+          echo "TSUNG_LOG_DIR=$TSUNG_LOG_DIR" >> $GITHUB_ENV
+
+      - name: Copy logs from container to host -- Many requests, Few clients
+        run: |
+          docker cp itmo-highload-2025-tsung-1:$TSUNG_LOG_DIR ./reports/tsung-many-clients-many-requests-logs
+
+      #--------------------------------------------------------
+
       - name: Upload Tsung logs as an artifact
         uses: actions/upload-artifact@v4
         with:
-          name: tsung-many-clients-few-requests-logs
-          path: reports/tsung-many-clients-few-requests-logs
-
-#      #--------------------------------------------------------
-#
-#      - name: Load tests -- Many requests, Few clients
-#        run: |
-#          TSUNG_OUTPUT=$(tsung -f ./tsung/many-requests-few-clients.xml start)
-#          echo "$TSUNG_OUTPUT"
-#
-#          TSUNG_LOG_DIR=$(echo "$TSUNG_OUTPUT" | grep 'Log directory is:' | awk -F': ' '{print $2}')
-#          echo "TSUNG_LOG_DIR=$TSUNG_LOG_DIR" >> $GITHUB_ENV
-#          echo "Tsung log directory: $TSUNG_LOG_DIR"
-#
-#      - name: Archive Tsung logs -- Many requests, Few clients
-#        run: |
-#          mkdir -p reports
-#          cp -r "$TSUNG_LOG_DIR" reports/tsung-many-requests-few-clients-logs
-#
-#      - name: Upload Tsung logs as artifact -- Many requests, Few clients
-#        uses: actions/upload-artifact@v4
-#        with:
-#          name: tsung-many-requests-few-clients-logs
-#          path: reports/tsung-many-requests-few-clients-logs
-#
-#      #--------------------------------------------------------
-#
-#      - name: Load tests -- Many clients, Many requests
-#        run: |
-#          TSUNG_OUTPUT=$(tsung -f ./tsung/many-clients-many-requests.xml start)
-#          echo "$TSUNG_OUTPUT"
-#
-#          TSUNG_LOG_DIR=$(echo "$TSUNG_OUTPUT" | grep 'Log directory is:' | awk -F': ' '{print $2}')
-#          echo "TSUNG_LOG_DIR=$TSUNG_LOG_DIR" >> $GITHUB_ENV
-#          echo "Tsung log directory: $TSUNG_LOG_DIR"
-#
-#      - name: Archive Tsung logs -- Many clients, Many requests
-#        run: |
-#          mkdir -p reports
-#          cp -r "$TSUNG_LOG_DIR" reports/tsung-many-clients-many-requests-logs
-#
-#      - name: Upload Tsung logs as artifact -- Many clients, Many requests
-#        uses: actions/upload-artifact@v4
-#        with:
-#          name: tsung-many-clients-many-requests-logs
-#          path: reports/tsung-many-clients-many-requests-logs
+          name: reports
+          path: reports
 
 #  publish:
 #    name: publish

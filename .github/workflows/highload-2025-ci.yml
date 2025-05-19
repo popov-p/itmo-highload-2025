@@ -25,54 +25,45 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-#      - name: Set up Python
-#        uses: actions/setup-python@v5
-#        with:
-#          python-version: '3.12'
-#
-#      - name: Upgrade pip and install Poetry via pip
-#        run: |
-#          python -m pip install --upgrade pip
-#          pip install poetry
-#
-#      - name: Install dependencies
-#        run: |
-#          cd controller && poetry install
-#          cd ../rule_engine && poetry install
-#
-#      - name: Run Unit tests
-#        env:
-#          PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION: python
-#        run: |
-#          cd controller && poetry run pytest -m unit
-#          cd ../rule_engine && poetry run pytest -m unit
-#
-#      - name: Integration tests
-#        env:
-#          PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION: python
-#        run: |
-#          docker compose up -d nginx
-#          docker compose up -d controller
-#          docker compose up -d rule_engine
-#          docker compose logs -f &
-#
-#          cd controller && poetry run pytest -m integration
-#          cd ../rule_engine && poetry run pytest -m integration
-#
-#      - name: Install tsung
-#        run: |
-#          sudo apt install tsung
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Upgrade pip and install Poetry via pip
+        run: |
+          python -m pip install --upgrade pip
+          pip install poetry
+
+      - name: Install dependencies
+        run: |
+          cd controller && poetry install
+          cd ../rule_engine && poetry install
+
+      - name: Run Unit tests
+        env:
+          PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION: python
+        run: |
+          cd controller && poetry run pytest -m unit
+          cd ../rule_engine && poetry run pytest -m unit
+
+      - name: Integration tests
+        env:
+          PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION: python
+        run: |
+          docker compose up -d tsung
+          docker compose up -d nginx
+          docker compose up -d controller
+          docker compose up -d rule_engine
+          docker compose logs -f &
+
+          cd controller && poetry run pytest -m integration
+          cd ../rule_engine && poetry run pytest -m integration
 
       #--------------------------------------------------------
 
       - name: Load tests -- Many clients, Few requests
         run: |
-          docker compose up -d nginx
-          docker compose up -d controller
-          docker compose up -d rule_engine
-          docker compose up -d tsung
-          docker compose logs -f &
-          
           docker exec highload-2025-tsung-1 tsung -f ./scenarios/many-clients-few-requests.xml start
 
       - name: Get Tsung log directory

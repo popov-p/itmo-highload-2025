@@ -20,7 +20,7 @@ jobs:
 
   test:
     runs-on: ubuntu-22.04
-    needs: build
+#    needs: build
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -86,7 +86,7 @@ jobs:
           mkdir -p reports
           docker cp highload-2025-tsung-1:$TSUNG_LOG_DIR ./reports/tsung-many-clients-few-requests-logs
 
-      - name: Upload Tsung logs as artifact
+      - name: Upload Tsung logs as an artifact
         uses: actions/upload-artifact@v4
         with:
           name: tsung-many-clients-few-requests-logs

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE tsung SYSTEM "/usr/share/tsung/tsung-1.0.dtd">
+
 <tsung loglevel="info">
   <clients>
     <client host="localhost" maxusers="20000" use_controller_vm="true"/>
@@ -11,8 +12,8 @@
 
   <load>
     <arrivalphase phase="1" duration="30" unit="second">
-<!--      <users maxnumber="400" arrivalrate="50" unit="second"/>-->
-      <users maxnumber="4" arrivalrate="50" unit="second"/>
+      <users maxnumber="400" arrivalrate="50" unit="second"/>
+<!--      <users maxnumber="4" arrivalrate="50" unit="second"/>-->
     </arrivalphase>
   </load>
 

@@ -1,6 +1,5 @@
 import redis
 import asyncio
-from statistics import mean
 import logging
 import json
 import socket

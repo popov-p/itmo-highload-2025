@@ -79,8 +79,10 @@ async def on_message(message: aiormq.abc.DeliveredMessage):
 
                 await db.drop_collection(current_id_stack)
 
-            if await current_id_stack.count_documents({}) >= 10:
-                await db.drop_collection(current_id_stack)
+        if await current_id_stack.count_documents({}) >= 10:
+            await db.drop_collection(current_id_stack)
+        else:
+            logging.info(f"Количество документов в current stack не превосходит 10.")
 
         logging.info(f"Сообщение добавлено в коллекцию data: {message_data}.")
         await message.channel.basic_ack(message.delivery_tag)

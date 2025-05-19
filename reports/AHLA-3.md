@@ -31,40 +31,40 @@
     - `MEM_USAGE = Gauge('service_mem_usage_percent', 'RAM usage in percent')`
 
 ###### Статус активности prometheus scraping
-![prometheus](./docs/AHLA-3-prometheus.png)
+![prometheus](../docs/AHLA-3-prometheus.png)
 
 ###### Визуализация dashboards, по которым будет настроен алертинг
 - Cpu Usage per instance, %
-![grafana-cpu](./docs/AHLA-3-grafana-cpu-percent.png)
+![grafana-cpu](../docs/AHLA-3-grafana-cpu-percent.png)
 - 
 - Mem Usage per instance, %
-![grafana-mem](./docs/AHLA-3-grafana-mem-usage.png)
+![grafana-mem](../docs/AHLA-3-grafana-mem-usage.png)
 - 
 - Downtime [0 or 1]
-![grafana-downtime](./docs/AHLA-3-grafana-downtime.png)
+![grafana-downtime](../docs/AHLA-3-grafana-downtime.png)
 
 - Instant rules counter
-![grafana-instant](./docs/AHLA-3-grafana-instant.png)
+![grafana-instant](../docs/AHLA-3-grafana-instant.png)
 
 - Ongoing rules counter
-![grafana-ongoing](./docs/AHLA-3-grafana-ongoing.png)
+![grafana-ongoing](../docs/AHLA-3-grafana-ongoing.png)
 
 ##### Пример alerting
 Естественно заметить, что если alert в состоянии `Firing` - это знчит, что он активен.  
 Если в состоянии `Normal` - причины для тревоги отсутствуют.
 
 - Ongoing rules counter
-![grafana-alerts](./docs/AHLA-3-grafana-alerts.png)
+![grafana-alerts](../docs/AHLA-3-grafana-alerts.png)
 
 ### CI. Github Workflows
 Реализовано `unit` тестирования при помощи `pytest` и `unittest.mock`.
 Реализовано интеграционное тестирование при помощи `pytest`, `docker`.
 Реализованы проверки на каждую `HTTPException`, а также на срабатывание бизнес-логики `rule_engine`:
 `instant-rules`, `ongoing rules`.
-![grafana-alerts](./docs/AHLA-3-CI.png)
+![grafana-alerts](../docs/AHLA-3-CI.png)
 ### Выгрузка образов в DockerHub 
 Настроена автоматическая выгрузка контейнеров в DockerHub
 
 - Ongoing rules counter
-![docker-hub](./docs/AHLA-3-docker-hub.png)
+![docker-hub](../docs/AHLA-3-docker-hub.png)
 - 

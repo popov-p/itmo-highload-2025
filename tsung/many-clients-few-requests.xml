@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE tsung SYSTEM "/usr/share/tsung/tsung-1.0.dtd">
+<!--<!DOCTYPE tsung SYSTEM "/usr/share/tsung/tsung-1.0.dtd">-->
+<!DOCTYPE tsung SYSTEM "/usr/local/share/tsung/tsung-1.0.dtd">
+
 <tsung loglevel="info">
   <clients>
     <client host="localhost" maxusers="20000" use_controller_vm="true"/>
@@ -20,7 +22,7 @@
     <sessions>
     <session name="load_test" probability="100" type="ts_http">
       <request>
-        <http url="http://localhost:80/incoming-data" method="POST"
+        <http url="http://nginx/incoming-data" method="POST"
               contents="DbkYpUIV+ywhQR0yWp5CJS+XnUIqETE3NDc1Njk1NjkuMTQ4NTEzMhUIARIHVElUQU4gVh0AAL5CJQAA3kI="/>
       </request>
     </session>

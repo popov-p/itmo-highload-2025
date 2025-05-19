@@ -110,6 +110,19 @@ services:
     networks:
       - backend
 
+  tsung:
+    build:
+      context: ./tsung
+    restart: on-failure
+    volumes:
+      - tsung_src:/tsung/scenarios
+    develop:
+      watch:
+        - action: sync+restart
+          path: .
+          target: .
+
+
 #  elasticsearch:
 #    image: elasticsearch:8.15.3
 #    environment:
@@ -180,6 +193,7 @@ volumes:
   rabbitmq_data:
   controller_src:
   datasim_src:
+  tsung_src:
   rule_engine_src:
   grafana_storage:
   prometheus_data:

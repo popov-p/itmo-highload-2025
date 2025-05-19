@@ -13,6 +13,7 @@ import json
 import psutil
 import base64
 import socket
+import time
 
 @router.get("/metrics")
 def metrics():
@@ -91,4 +92,34 @@ async def cached_report():
         return json.loads(report_data.decode())
     else:
         raise HTTPException(status_code=404, detail=f"Report for controller {report_key} not found")
+
+@router.get("/dbwise-report", response_model=dict)
+async def cached_report():
+    now = time.time()
+    thirty_seconds_ago = now - 30
+
+    print(f"Время запроса данных: {now}")
+    cursor = db.data.find(
+        {"ker_load": {"$gte": 0}},
+        {
+            "timestamp": 1,
+            "ker_load": 1,
+            "ker_temp": 1,
+            "mem_temp": 1,
+            "mem_load": 1,
+            "gpu_info": 1,
+            "_id": 0
+        }
+    )
+    data = await cursor.to_list(length=None)
+
+    recent_data = [
+        doc for doc in data
+        if float(doc.get("timestamp", "0")) > thirty_seconds_ago
+    ]
+    print(f"Современные данные: {recent_data}")
+    if recent_data:
+        return {"report": recent_data}
+    else:
+        raise HTTPException(status_code=404, detail="No recent data found in the last 30 seconds")
 

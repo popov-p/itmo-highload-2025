@@ -14,19 +14,106 @@ services:
       - backend
 
   mongo:
-    image: mongo
-    restart: on-failure
+    image: mongo:6
+    ports:
+      - '27017:27017'
+    command: [ "--replSet", "rs0",
+               "--auth",
+               "--keyFile", "/etc/mongo-keyfile", "--bind_ip_all" ]
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: pavel
+      MONGO_INITDB_ROOT_PASSWORD: popov
+    volumes:
+      - ./mongo-keyfile:/etc/mongo-keyfile:ro
+      - mongo_data:/data/db
+    networks:
+      - backend
+
+  mongo_replica:
+    image: mongo:6
+    ports:
+      - '27018:27017'
+    command: [ "--replSet", "rs0",
+               "--auth",
+               "--keyFile", "/etc/mongo-keyfile",
+               "--bind_ip_all" ]
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: pavel
+      MONGO_INITDB_ROOT_PASSWORD: popov
+
+    volumes:
+      - ./mongo-keyfile:/etc/mongo-keyfile:ro
+      - mongo_replica:/data/db
+    networks:
+      - backend
+
+  mongo_arbiter:
+    image: mongo:6
+    command: [ "--replSet", "rs0", "--auth",
+              "--keyFile", "/etc/mongo-keyfile",
+               "--bind_ip_all" ]
     environment:
       MONGO_INITDB_ROOT_USERNAME: pavel
       MONGO_INITDB_ROOT_PASSWORD: popov
     ports:
-      - "27017:27017"
+      - '27019:27017'
     volumes:
-      - mongo_data:/data/db
-    depends_on:
-      - rabbitmq
+      - ./mongo-keyfile:/etc/mongo-keyfile:ro
     networks:
       - backend
+
+#  configsvr:
+#    image: mongo:6
+#    command: [ "--configsvr", "--replSet", "--port", "27017" ,"cfg", "--auth", "--keyFile", "/etc/mongo-keyfile", "--bind_ip_all" ]
+#    volumes:
+#      - ./mongo-keyfile:/etc/mongo-keyfile:ro
+#      - config_data:/data/configdb
+#    networks:
+#      - backend
+
+#  mongos:
+#    image: mongo:6
+#    ports:
+#      - "27020:27017"
+#    depends_on:
+#      - configsvr
+#      - mongo
+#    command: >
+#      mongos --configdb cfg/configsvr:27017 --keyFile /etc/mongo-keyfile --bind_ip_all
+#    volumes:
+#      - ./mongo-keyfile:/etc/mongo-keyfile:ro
+#    networks:
+#      - backend
+
+  init-mongo:
+    image: mongo:6
+    volumes:
+      - ./init-replica.sh:/init-replica.sh
+    networks:
+      - backend
+    depends_on:
+      - mongo
+      - mongo_replica
+      - mongo_arbiter
+    entrypoint:
+      - bash
+      - -c
+      - |
+        sleep 7
+        mongosh --host mongo:27017 -u pavel -p popov --authenticationDatabase admin <<EOF
+        rs.initiate({
+          _id: "rs0",
+          members: [
+            { _id: 0, host: "mongo:27017" },
+            { _id: 1, host: "mongo_replica:27017" },
+            { _id: 2, host: "mongo_arbiter:27017", arbiterOnly: true }
+          ]
+        })
+        EOF
+
+    deploy:
+      restart_policy:
+        condition: none
 
   controller:
     build:
@@ -42,6 +129,7 @@ services:
           target: .
     depends_on:
       - mongo
+      - mongo_replica
       - redis
       - rabbitmq
     networks:
@@ -64,6 +152,7 @@ services:
     depends_on:
       - controller
       - mongo
+      - mongo_replica
       - redis
       - rabbitmq
     networks:
@@ -190,6 +279,8 @@ services:
 
 volumes:
   mongo_data:
+  config_data:
+  mongo_replica:
   rabbitmq_data:
   controller_src:
   datasim_src:

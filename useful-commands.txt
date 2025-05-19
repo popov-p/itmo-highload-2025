@@ -1,1 +1,3 @@
 ### Сборка и/или запуск
+docker stack deploy -c docker-swarm.yml SCALE
+docker stack rm SCALE

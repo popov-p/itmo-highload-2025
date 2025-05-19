@@ -49,13 +49,51 @@
 - Это легко объясняется тем, что код написан на `Python`, и ` процесс Python`, запущенный на одном логическом ядре ЦП, не может 
 использовать ресурсы другого логическгого ядра ЦП. Поэтому вертикальное масштабирование эффекта не даст.
 - Чтобы получить эффект от производительности, нужно несколько процессов. Воспользуемся горизонтальным масштабированием.
-#### Эффект от горизонтального масштабирования
+- 
+## Эффект от горизонтального масштабирования
 Промасштабируем количество реплик `controller` и `rule_engine` до двух на каждую сущность. Исследуем производительность при помощи  
-всё тех же нагрузочных тестов `tsung`.  
-Будем использовать самый "тяжёлый" тестовый сценарий.
+всё тех же нагрузочных тестов `tsung` из лабораторной работы №4.
 
-#### Анализ и сравнение балансировщиков нагрузки
-Введём следующие сокращиения:
+### ГМ. Много клиентов, мало запросов
+![](../plots/AHLA-5/horizontal/mcfr/img_2.png)
+![](../plots/AHLA-5/horizontal/mcfr/img_3.png)
+![](../plots/AHLA-5/horizontal/mcfr/img.png)
+
+### ГМ. Много клиентов, много запросов
+![](../plots/AHLA-5/horizontal/mcmr/img.png)
+![](../plots/AHLA-5/horizontal/mcmr/img_1.png)
+![](../plots/AHLA-5/horizontal/mcmr/tsung-common.png)
+
+### ГМ. Много запросов, мало клиентов
+![](../plots/AHLA-5/horizontal/mrfc/img_1.png)
+![](../plots/AHLA-5/horizontal/mrfc/img.png)
+![](../plots/AHLA-5/horizontal/mrfc/tsung-common.png)
+
+## Анализ и сравнение алгоритмов балансировки нагрузки
+### Round-robin
+Анализ алгоритма можно произвести по графикам предыдущего пункта, т.к. именно этот алгоритм использовался при  
+их построении.
+## Least-conn 
+Хорош в случае, если запросов мало и они имеют большую длительность.  
+В нашем тест-кейсе предусмотрена логика с небольшой длительностью запросов.
+### Least-conn. Много клиентов, мало запросов
+![](../plots/AHLA-5/nginx-balance-algorithms/least-conn/mcfr/img_1.png)
+![](../plots/AHLA-5/nginx-balance-algorithms/least-conn/mcfr/img_2.png)
+![](../plots/AHLA-5/nginx-balance-algorithms/least-conn/mcfr/img.png)
+
+### Least-conn. Много клиентов, много запросов
+![](../plots/AHLA-5/nginx-balance-algorithms/least-conn/mcmr/img_2.png)
+![](../plots/AHLA-5/nginx-balance-algorithms/least-conn/mcmr/img_1.png)
+![](../plots/AHLA-5/nginx-balance-algorithms/least-conn/mcmr/img.png)
+
+### Least-conn. Много запросов, мало клиентов
+![](../plots/AHLA-5/nginx-balance-algorithms/least-conn/mrfc/img.png)
+![](../plots/AHLA-5/nginx-balance-algorithms/least-conn/mrfc/img_1.png)
+![](../plots/AHLA-5/nginx-balance-algorithms/least-conn/mrfc/img_2.png)
+
+### Random
+
+Введём следующие сокращения:
 1. mrfc - many requests few clients
 2. mcfr - many clients few requests
 3. mcmr - many clients many requests
@@ -77,7 +115,7 @@
 
 ### Выводы
 Проанализировав эту таблицу и графики, можно прийти к выводам:
-1. Горизонтальное масштабирование обеспечило прирост от `5%` производительности до `40%` призводительности по CPU  
+1. Горизонтальное масштабирование обеспечило прирост от `5%` производительности до `40%` производительности по CPU  
 в зависимости от алгоритма.
 2. Горизонтальное масштабирование не улучшило и не ухудшило потребление памяти.
 3. Постоянная пиковая наг

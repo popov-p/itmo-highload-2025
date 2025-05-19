@@ -74,8 +74,8 @@ jobs:
 
       - name: Copy logs from container to host -- Many requests, Few clients
         run: |
-          mkdir -p reports
-          docker cp itmo-highload-2025-tsung-1:$TSUNG_LOG_DIR ./reports/tsung-many-clients-few-requests-logs
+          mkdir -p tsung-reports
+          docker cp itmo-highload-2025-tsung-1:$TSUNG_LOG_DIR ./tsung-reports/tsung-many-clients-few-requests-logs
 
       #--------------------------------------------------------
 
@@ -91,7 +91,7 @@ jobs:
 
       - name: Copy logs from container to host -- Many requests, Few clients
         run: |
-          docker cp itmo-highload-2025-tsung-1:$TSUNG_LOG_DIR ./reports/tsung-many-requests-few-clients-logs
+          docker cp itmo-highload-2025-tsung-1:$TSUNG_LOG_DIR ./tsung-reports/tsung-many-requests-few-clients-logs
 
       #--------------------------------------------------------
 
@@ -107,15 +107,15 @@ jobs:
 
       - name: Copy logs from container to host -- Many requests, Few clients
         run: |
-          docker cp itmo-highload-2025-tsung-1:$TSUNG_LOG_DIR ./reports/tsung-many-clients-many-requests-logs
+          docker cp itmo-highload-2025-tsung-1:$TSUNG_LOG_DIR ./tsung-reports/tsung-many-clients-many-requests-logs
 
       #--------------------------------------------------------
 
       - name: Upload Tsung logs as an artifact
         uses: actions/upload-artifact@v4
         with:
-          name: reports
-          path: reports
+          name: tsung-reports
+          path: tsung-reports
 
 #  publish:
 #    name: publish

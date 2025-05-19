@@ -36,7 +36,14 @@ services:
       - redis
       - rabbitmq
     deploy:
-      replicas: 1
+      replicas: 2
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 1G
+        reservations:
+          cpus: '1.0'
+          memory: 512M
       restart_policy:
         condition: on-failure
     networks:
@@ -55,7 +62,14 @@ services:
       - redis
       - rabbitmq
     deploy:
-      replicas: 1
+      replicas: 2
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 1G
+        reservations:
+          cpus: '1.0'
+          memory: 512M
       restart_policy:
         condition: on-failure
     networks:

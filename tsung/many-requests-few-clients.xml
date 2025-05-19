@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--<!DOCTYPE tsung SYSTEM "/usr/share/tsung/tsung-1.0.dtd">-->
+<!DOCTYPE tsung SYSTEM "/usr/share/tsung/tsung-1.0.dtd">
 
-<!DOCTYPE tsung SYSTEM "/usr/local/share/tsung/tsung-1.0.dtd">
+<!--<!DOCTYPE tsung SYSTEM "/usr/local/share/tsung/tsung-1.0.dtd">-->
 
 <tsung loglevel="info">
   <clients>
@@ -14,11 +14,10 @@
 
   <load>
     <arrivalphase phase="1" duration="30" unit="second">
-<!--      <users maxnumber="100" arrivalrate="50" unit="second"/>-->
-      <users maxnumber="4" arrivalrate="50" unit="second"/>
+      <users maxnumber="20" arrivalrate="20" unit="second"/>
+<!--      <users maxnumber="4" arrivalrate="50" unit="second"/>-->
     </arrivalphase>
   </load>
-
 
     <sessions>
     <session name="load_test" probability="100" type="ts_http">

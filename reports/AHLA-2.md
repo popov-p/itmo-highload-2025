@@ -38,7 +38,7 @@
   `gpu_id`, то сгенерировать `ongoing rule` и вставить эту запись в базу данных.
 
 ##### Пример кэшированного отчёта в `Redis`
-![redis-report](../docs/AHLA-2-redis-report.png)
+![redis-report](../plots/AHLA-2/AHLA-2-redis-report.png)
 
 ##### Логирование
 Реализована широкая система логирования при помощи `ELK Stack + filebeat`.  
@@ -47,4 +47,4 @@
 Логи отправляются в `ELK Stack` при помощи инструмента сбора логов `filebeat`.
 
 ##### Пример наличия логов в интерфейсе `Kibana`
-![elk-stack](../docs/AHLA-2-elk.png)
+![elk-stack](../plots/AHLA-2/AHLA-2-elk.png)

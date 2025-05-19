@@ -68,14 +68,14 @@ jobs:
 
       - name: Get Tsung log directory
         run: |
-          TSUNG_LOG_DIR=$(docker exec highload-2025-tsung-1 sh -c 'ls -td /root/.tsung/log/* | head -n 1')
+          TSUNG_LOG_DIR=$(docker exec itmo-highload-2025-tsung-1 sh -c 'ls -td /root/.tsung/log/* | head -n 1')
           echo "Found Tsung log dir: $TSUNG_LOG_DIR"
           echo "TSUNG_LOG_DIR=$TSUNG_LOG_DIR" >> $GITHUB_ENV
 
       - name: Copy logs from container to host
         run: |
           mkdir -p reports
-          docker cp highload-2025-tsung-1:$TSUNG_LOG_DIR ./reports/tsung-many-clients-few-requests-logs
+          docker cp itmo-highload-2025-tsung-1:$TSUNG_LOG_DIR ./reports/tsung-many-clients-few-requests-logs
 
       - name: Upload Tsung logs as an artifact
         uses: actions/upload-artifact@v4

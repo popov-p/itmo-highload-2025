@@ -64,7 +64,7 @@ jobs:
 
       - name: Load tests -- Many clients, Few requests
         run: |
-          docker exec highload-2025-tsung-1 tsung -f ./scenarios/many-clients-few-requests.xml start
+          docker exec itmo-highload-2025-tsung-1 tsung -f ./scenarios/many-clients-few-requests.xml start
 
       - name: Get Tsung log directory
         run: |

@@ -199,17 +199,17 @@ services:
     networks:
       - backend
 
-#  tsung:
-#    build:
-#      context: ./tsung
-#    restart: on-failure
-#    volumes:
-#      - tsung_src:/tsung/scenarios
-#    develop:
-#      watch:
-#        - action: sync+restart
-#          path: .
-#          target: .
+  tsung:
+    build:
+      context: ./tsung
+    restart: on-failure
+    volumes:
+      - tsung_src:/tsung/scenarios
+    develop:
+      watch:
+        - action: sync+restart
+          path: .
+          target: .
 
 
 #  elasticsearch:

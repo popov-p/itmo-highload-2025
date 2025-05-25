@@ -13,107 +13,156 @@ services:
     networks:
       - backend
 
-  mongo:
+  mongo_rs1_primary:
     image: mongo:6
-    ports:
-      - '27017:27017'
-    command: [ "--replSet", "rs0",
-               "--auth",
-               "--keyFile", "/etc/mongo-keyfile", "--bind_ip_all" ]
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: pavel
-      MONGO_INITDB_ROOT_PASSWORD: popov
-    volumes:
-      - ./mongo-keyfile:/etc/mongo-keyfile:ro
-      - mongo_data:/data/db
+    command: [ "--replSet", "rs1", "--bind_ip_all", "--shardsvr", "--port", "27017" ]
     networks:
       - backend
 
-  mongo_replica:
+  mongo_rs1_secondary:
     image: mongo:6
-    ports:
-      - '27018:27017'
-    command: [ "--replSet", "rs0",
-               "--auth",
-               "--keyFile", "/etc/mongo-keyfile",
-               "--bind_ip_all" ]
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: pavel
-      MONGO_INITDB_ROOT_PASSWORD: popov
-
-    volumes:
-      - ./mongo-keyfile:/etc/mongo-keyfile:ro
-      - mongo_replica:/data/db
+    command: [ "--replSet", "rs1",
+               "--bind_ip_all", "--shardsvr", "--port", "27017" ]
     networks:
       - backend
 
-  mongo_arbiter:
+  mongo_rs1_tertiary:
     image: mongo:6
-    command: [ "--replSet", "rs0", "--auth",
-              "--keyFile", "/etc/mongo-keyfile",
-               "--bind_ip_all" ]
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: pavel
-      MONGO_INITDB_ROOT_PASSWORD: popov
-    ports:
-      - '27019:27017'
-    volumes:
-      - ./mongo-keyfile:/etc/mongo-keyfile:ro
+    command: [ "--replSet", "rs1",
+               "--bind_ip_all", "--shardsvr", "--port", "27017" ]
     networks:
       - backend
 
-#  configsvr:
-#    image: mongo:6
-#    command: [ "--configsvr", "--replSet", "--port", "27017" ,"cfg", "--auth", "--keyFile", "/etc/mongo-keyfile", "--bind_ip_all" ]
-#    volumes:
-#      - ./mongo-keyfile:/etc/mongo-keyfile:ro
-#      - config_data:/data/configdb
-#    networks:
-#      - backend
-
-#  mongos:
-#    image: mongo:6
-#    ports:
-#      - "27020:27017"
-#    depends_on:
-#      - configsvr
-#      - mongo
-#    command: >
-#      mongos --configdb cfg/configsvr:27017 --keyFile /etc/mongo-keyfile --bind_ip_all
-#    volumes:
-#      - ./mongo-keyfile:/etc/mongo-keyfile:ro
-#    networks:
-#      - backend
-
-  init-mongo:
+  mongo_rs2_primary:
     image: mongo:6
-    volumes:
-      - ./init-replica.sh:/init-replica.sh
+    command: [ "--replSet", "rs2", "--bind_ip_all", "--shardsvr", "--port", "27017" ]
     networks:
       - backend
+
+  mongo_rs2_secondary:
+    image: mongo:6
+    command: [ "--replSet", "rs2", "--bind_ip_all", "--shardsvr", "--port", "27017" ]
+    networks:
+      - backend
+
+  mongo_rs2_tertiary:
+    image: mongo:6
+    command: [ "--replSet", "rs2",
+               "--bind_ip_all", "--shardsvr", "--port", "27017" ]
+    networks:
+      - backend
+
+  mongo_config1:
+    image: mongo:6
+    command: [ "--replSet", "configReplSet", "--configsvr", "--bind_ip_all", "--port", "27017" ]
+    networks:
+      - backend
+
+  mongo_config2:
+    image: mongo:6
+    command: [ "--replSet", "configReplSet", "--configsvr", "--bind_ip_all", "--port", "27017" ]
+    networks:
+      - backend
+
+  mongo_config3:
+    image: mongo:6
+    command: [ "--replSet", "configReplSet", "--configsvr", "--bind_ip_all", "--port", "27017" ]
+    networks:
+      - backend
+
+  mongos:
+    image: mongo:6
+    command: >
+      mongos --configdb configReplSet/mongo_config1:27017,mongo_config2:27017,mongo_config3:27017 --port 27017 "--bind_ip_all"
     depends_on:
-      - mongo
-      - mongo_replica
-      - mongo_arbiter
+      - mongo_config1
+      - mongo_config2
+      - mongo_config3
+    networks:
+      - backend
+
+  init-sharding:
+    image: mongo:6
+    depends_on:
+      - mongo_config1
+      - mongo_config2
+      - mongo_config3
+      - init-replicasets
+      - mongos
+    networks:
+      - backend
     entrypoint:
       - bash
       - -c
       - |
-        sleep 7
-        mongosh --host mongo:27017 -u pavel -p popov --authenticationDatabase admin <<EOF
+        sleep 20
+        echo "Initializing config replica set..."
+        mongosh --host mongo_config1:27017 <<EOF
         rs.initiate({
-          _id: "rs0",
+          _id: "configReplSet",
+          configsvr: true,
           members: [
-            { _id: 0, host: "mongo:27017" },
-            { _id: 1, host: "mongo_replica:27017" },
-            { _id: 2, host: "mongo_arbiter:27017", arbiterOnly: true }
+            { _id: 0, host: "mongo_config1:27017" },
+            { _id: 1, host: "mongo_config2:27017" },
+            { _id: 2, host: "mongo_config3:27017" }
           ]
         })
         EOF
 
-    deploy:
-      restart_policy:
-        condition: none
+        until [ "$(mongosh --quiet --host mongo_config1:27017 --eval 'print(rs.isMaster().ismaster)')" = "true" ]
+        do
+          echo "Still waiting for PRIMARY..."
+          sleep 2
+        done
+        echo "PRIMARY is ready."
+
+
+        sleep 5
+        echo "Adding shards..."
+        mongosh --host mongos:27017 <<EOF
+        sh.addShard("rs1/mongo_rs1_primary:27017,mongo_rs1_secondary:27017,mongo_rs1_tertiary:27017")
+        sh.addShard("rs2/mongo_rs2_primary:27017,mongo_rs2_secondary:27017,mongo_rs2_tertiary:27017")
+        sh.enableSharding("iotdata")
+        sh.shardCollection("iotdata.data", { _id: 1})
+        EOF
+
+  init-replicasets:
+    image: mongo:6
+    networks:
+      - backend
+    depends_on:
+      - mongo_rs1_primary
+      - mongo_rs1_secondary
+      - mongo_rs1_tertiary
+      - mongo_rs2_primary
+      - mongo_rs2_secondary
+      - mongo_rs2_tertiary
+    entrypoint:
+      - bash
+      - -c
+      - |
+        sleep 10
+        mongosh --host mongo_rs1_primary:27017 <<EOF
+        rs.initiate({
+          _id: "rs1",
+          members: [
+            { _id: 0, host: "mongo_rs1_primary:27017" },
+            { _id: 1, host: "mongo_rs1_secondary:27017" },
+            { _id: 2, host: "mongo_rs1_tertiary:27017" }
+          ]
+        })
+        EOF
+
+        mongosh --host mongo_rs2_primary:27017 <<EOF
+        rs.initiate({
+          _id: "rs2",
+          members: [
+            { _id: 0, host: "mongo_rs2_primary:27017" },
+            { _id: 1, host: "mongo_rs2_secondary:27017" },
+            { _id: 2, host: "mongo_rs2_tertiary:27017"}
+          ]
+        })
+        EOF
 
   controller:
     build:
@@ -128,10 +177,9 @@ services:
           path: .
           target: .
     depends_on:
-      - mongo
-      - mongo_replica
       - redis
       - rabbitmq
+      - init-sharding
     networks:
       - backend
 
@@ -151,10 +199,9 @@ services:
           target: .
     depends_on:
       - controller
-      - mongo
-      - mongo_replica
       - redis
       - rabbitmq
+      - init-sharding
     networks:
       - backend
 
@@ -278,9 +325,7 @@ services:
       - backend
 
 volumes:
-  mongo_data:
   config_data:
-  mongo_replica:
   rabbitmq_data:
   controller_src:
   datasim_src:

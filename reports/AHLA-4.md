@@ -4,7 +4,7 @@
 **Группа:** P4116  
 **Преподаватели:** Перл И.А., Шилин И.А, Плюхин Д.А., Василегин В.И.
 
-## Задание к лабораторной работе №3
+## Задание к лабораторной работе №4
 Требуется:
 1. Подготовить образ контейнера Tsung для использования.  
 его в сценариях нагрузочного тестирования
@@ -48,8 +48,8 @@
 - Видно, что длительность запроса не превышает `10 msec`. 
 ![](../plots/AHLA-4/mcfr/many-clients-few-requests-cpu.png)
 ![](../plots/AHLA-4/mcfr/many-clients-few-requests-mem.png)
-![](../plots/AHLA-4/mcfr/many-clients-few-requests-tsung-common.png)
-![](../plots/AHLA-4/mcfr/many-clients-few-requests-plots.png)
+![](../plots/AHLA-4/mcfr/img.png)
+![](../plots/AHLA-4/mcfr/img_1.png)
    
 
 #### Мало видеокарт-отправителей пакетов, много пакетов с данными от датчика видеокарты.

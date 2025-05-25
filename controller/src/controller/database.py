@@ -1,5 +1,5 @@
 from motor.motor_asyncio import AsyncIOMotorClient
 
-MONGO_URI = "mongodb://pavel:popov@mongo:27017/iotdata?authSource=admin"
+MONGO_URI = "mongodb://mongos:27017/iotdata"
 client = AsyncIOMotorClient(MONGO_URI)
 db = client.iotdata

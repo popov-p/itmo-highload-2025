@@ -78,6 +78,8 @@ services:
       - mongo_config1
       - mongo_config2
       - mongo_config3
+    ports:
+      - '27022:27017'
     networks:
       - backend
 
